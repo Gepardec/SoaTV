@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+	<id>XA124</id>
+	<node>
+		Mail_Host
+	</node>
+	<component>
+		Mail1
+	</component>
+	<status>
+		RECEIVED
+	</status>
+</message>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+	<id>XA125</id>
+	<node>
+		Http_Host
+	</node>
+	<component>
+		Http1
+	</component>
+	<status>
+		SENT
+	</status>
+</message>

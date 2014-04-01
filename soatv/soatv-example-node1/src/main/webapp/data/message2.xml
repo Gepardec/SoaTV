@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+	<id>XA123</id>
+	<node>
+		DB_Host
+	</node>
+	<component>
+		DB1
+	</component>
+	<status>
+		RECEIVED
+	</status>
+</message>
