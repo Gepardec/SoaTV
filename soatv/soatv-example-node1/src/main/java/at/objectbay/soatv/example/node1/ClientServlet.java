@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Hashtable;
 
 import javax.inject.Inject;
 import javax.jms.Connection;
@@ -34,8 +35,6 @@ public class ClientServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		
-		agent.cf("/ConnectionFactory").topic("topic/soatvTopic");
 		
 		PrintWriter out = response.getWriter();
 
@@ -95,10 +94,22 @@ public class ClientServlet extends HttpServlet {
 			
 			// notify soatv
 			agent
-			.node("My JBoss")
-			.component("Client Servlet")
-			.id(message.getJMSMessageID())
-			.status("sent").send();
+			// setup JNDI lookup
+			.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
+			.property(Context.SECURITY_PRINCIPAL, "user")
+			.property(Context.SECURITY_CREDENTIALS, "user@123")
+			// setup topic access
+			.property(Agent.REMOTE_JMS, "true")
+			.property(Agent.REMOTE_TOPIC_USER_NAME, "user")
+			.property(Agent.REMOTE_TOPIC_PASSWORD, "user@123")
+			//setup addresses
+			.cf("/jms/RemoteConnectionFactory")
+			.topic("/jms/topic/soatvTopic")
+			
+			.node("My JBoss")				// name of the node (e.g. jboss instance) that sends a message
+			.component("Client Servlet")	// name of the component (e.g. ws, servlet) that sends a message
+			.id(message.getJMSMessageID())	// unique id of message
+			.status("sent").send();			// status ("sent"||"received" : component has sent || received some business message
 			
 		} catch (Exception exc) {
 			exc.printStackTrace();
