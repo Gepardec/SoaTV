@@ -16,10 +16,10 @@ soatv-example-node1/.classpath
 soatv-example-node1/.project
 soatv-example-node1/.settings/
 soatv-example-node1/target/
-soatv-example-node2/soatv-example-node2/.classpath
-soatv-example-node2/soatv-example-node2/.project
-soatv-example-node2/soatv-example-node2/.settings/
-soatv-example-node2/soatv-example-node2/target/
+soatv-example-node2/.classpath
+soatv-example-node2/.project
+soatv-example-node2/.settings/
+soatv-example-node2/target/
 soatv-web/.classpath
 soatv-web/.project
 soatv-web/.settings/

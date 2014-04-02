@@ -10,7 +10,7 @@
 		<module>soatv-example-node1</module>
 		<module>soatv-web</module>
 		<module>soatv-core</module>
-		<module>soatv-example-node2/soatv-example-node2</module>
+		<module>soatv-example-node2</module>
 		<module>soatv-agent</module>
 	</modules>
 
