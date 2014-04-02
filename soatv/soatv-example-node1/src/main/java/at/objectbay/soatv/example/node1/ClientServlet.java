@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -22,12 +23,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.objectbay.soatv.agent.Agent;
+
 @WebServlet("/ClientServlet")
 public class ClientServlet extends HttpServlet {
 	private static final long serialVersionUID = -4257270508512265869L;
+	
+	@Inject
+	private Agent agent;
 
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
+		
+		agent.cf("/ConnectionFactory").topic("topic/soatvTopic");
+		
 		PrintWriter out = response.getWriter();
 
 		out.println("Session ID: " + request.getSession().getId());
@@ -83,6 +92,14 @@ public class ClientServlet extends HttpServlet {
 
 			TextMessage message = session.createTextMessage(msg);
 			publisher.send(message);
+			
+			// notify soatv
+			agent
+			.node("My JBoss")
+			.component("Client Servlet")
+			.id(message.getJMSMessageID())
+			.status("sent").send();
+			
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		} finally {
@@ -129,6 +146,9 @@ public class ClientServlet extends HttpServlet {
 				System.out.println("Message sent: " + content);
 				buffer.append(content);
 				buffer.append(System.getProperty("line.separator"));
+				
+				//send reporting message
+				
 				Thread.sleep(1000);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

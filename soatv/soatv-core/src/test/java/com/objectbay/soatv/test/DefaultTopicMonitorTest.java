@@ -1,15 +1,15 @@
 package com.objectbay.soatv.test;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import com.objectbay.soatv.jms.DefaultTopicMonitorImpl;
-import com.objectbay.soatv.jms.messaging.ComponentMessage;
-import com.objectbay.soatv.jms.messaging.ComponentMessage.MessageStatus;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
+import com.objectbay.soatv.jms.DefaultTopicMonitorImpl;
+import com.objectbay.soatv.jms.messaging.ComponentMessage;
 
 public class DefaultTopicMonitorTest {
 	

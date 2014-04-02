@@ -4,8 +4,11 @@ import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+
+import com.objectbay.soatv.agent.Agent;
 
 @MessageDriven(name = "MessageMDBSample", activationConfig = {
 @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Topic"),
@@ -26,10 +29,21 @@ public class TopicListener implements MessageListener{
 	}
 	
 	@Inject Event<TopicListenerOnMessageEvent> event;
+	@Inject Agent agent;
 	
 	public void onMessage(Message arg0) {
 		
-		System.out.println("Node2 received a message: " + arg0.toString());
+		try {
+			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			.node("My JBoss 2")
+			.component("Topic Listener")
+			.id(arg0.getJMSMessageID())
+			.status("received")
+			.send();
+		} catch (JMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

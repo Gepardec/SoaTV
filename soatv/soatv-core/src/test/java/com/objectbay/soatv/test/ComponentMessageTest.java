@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
-import com.objectbay.soatv.jms.messaging.ComponentMessage.MessageStatus;
 import com.objectbay.soatv.jms.messaging.MessageIO;
 import com.objectbay.soatv.jms.messaging.XMLComponentMessageReader;
 

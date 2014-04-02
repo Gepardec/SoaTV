@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.objectbay.soatv.jms.messaging.ComponentMessage.MessageStatus;
+import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
 import com.objectbay.soatv.utils.CDIUtils.DefaultComponentMessageIO;
 import com.objectbay.soatv.utils.MessageFieldUtils;
 import com.objectbay.soatv.utils.MessageFieldUtils.MessageField;

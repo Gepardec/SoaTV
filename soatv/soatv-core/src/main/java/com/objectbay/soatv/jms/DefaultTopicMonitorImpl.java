@@ -10,9 +10,9 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
 import com.objectbay.soatv.jms.TopicMonitorEvent.TopicMonitorEventType;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
-import com.objectbay.soatv.jms.messaging.ComponentMessage.MessageStatus;
 import com.objectbay.soatv.jms.messaging.MessageIO;
 import com.objectbay.soatv.utils.CDIUtils.DefaultComponentMessageIO;
 import com.objectbay.soatv.utils.CDIUtils.DefaultTopicMonitor;

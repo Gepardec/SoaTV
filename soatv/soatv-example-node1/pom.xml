@@ -14,6 +14,11 @@
 			<artifactId>jboss-jms-api_1.1_spec</artifactId>
 			<version>1.0.0.Final</version>
 		</dependency>
+		<dependency>
+			<groupId>com.objectbay</groupId>
+			<artifactId>soatv-agent</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

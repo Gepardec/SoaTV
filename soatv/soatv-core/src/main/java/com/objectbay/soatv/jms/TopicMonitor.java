@@ -10,8 +10,8 @@ import java.util.Set;
 
 import javax.jms.Message;
 
+import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
-import com.objectbay.soatv.jms.messaging.ComponentMessage.MessageStatus;
 import com.objectbay.soatv.utils.Notifier;
 
 /**
