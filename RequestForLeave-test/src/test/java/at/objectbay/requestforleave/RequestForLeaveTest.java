@@ -22,7 +22,7 @@ public class RequestForLeaveTest extends JbpmJUnitBaseTestCase {
 	
 	@Test
 	public void daysIsTwoAndSuperiorAcceptsRequestForLeave(){
-		RuntimeManager runtimeManager = createRuntimeManager("at/objectbay/requestforleave/RequestForLeave.bpmn2");
+		RuntimeManager runtimeManager = createRuntimeManager("com/objectbay/requestforleave/RequestForLeave.bpmn2");
 		
 		RuntimeEngine runtimeEngine = getRuntimeEngine(null);
 		KieSession kieSession = runtimeEngine.getKieSession();
@@ -64,7 +64,7 @@ public class RequestForLeaveTest extends JbpmJUnitBaseTestCase {
 	
 	@Test
 	public void daysIsTwoAndSuperiorDeclinesRequestForLeave(){
-		RuntimeManager runtimeManager = createRuntimeManager("at/objectbay/requestforleave/RequestForLeave.bpmn2");
+		RuntimeManager runtimeManager = createRuntimeManager("com/objectbay/requestforleave/RequestForLeave.bpmn2");
 		
 		RuntimeEngine runtimeEngine = getRuntimeEngine(null);
 		KieSession kieSession = runtimeEngine.getKieSession();
@@ -108,7 +108,7 @@ public class RequestForLeaveTest extends JbpmJUnitBaseTestCase {
 	
 	@Test
 	public void daysIsOneRequestGetsAcceptedAutomatically(){
-		RuntimeManager runtimeManager = createRuntimeManager("at/objectbay/requestforleave/RequestForLeave.bpmn2");
+		RuntimeManager runtimeManager = createRuntimeManager("com/objectbay/requestforleave/RequestForLeave.bpmn2");
 		
 		RuntimeEngine runtimeEngine = getRuntimeEngine(null);
 		KieSession kieSession = runtimeEngine.getKieSession();
