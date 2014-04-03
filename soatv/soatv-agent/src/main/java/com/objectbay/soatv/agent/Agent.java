@@ -5,8 +5,10 @@ import java.util.Hashtable;
 import javax.inject.Singleton;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -45,6 +47,7 @@ public class Agent {
 	private Hashtable<String, String> properties;
 
 	private String jndiTopic;
+	private String jndiQueue;
 	private String jndiCF;
 
 	public Agent() {
@@ -68,6 +71,17 @@ public class Agent {
 	 */
 	public Agent topic(String jndiTopicName) {
 		jndiTopic = jndiTopicName;
+		return this;
+	}
+	
+	/**
+	 * Sets jndi queue name
+	 * 
+	 * @param jndiQueueName
+	 * @return current instance of Agent
+	 */
+	public Agent queue(String jndiQueueName) {
+		jndiQueue = jndiQueueName;
 		return this;
 	}
 
@@ -203,8 +217,8 @@ public class Agent {
 	 * Sends message to topic
 	 */
 	private void sendMessage(String msg) {
-		if (jndiTopic == null) {
-			log.warn("JNDI topic name is not set, use topic() for this.");
+		if (jndiTopic == null && jndiQueue == null) {
+			log.warn("Neither JNDI topic name nor JNDI queue name is set, use topic()/queue() for this.");
 			return;
 		}
 
@@ -221,8 +235,12 @@ public class Agent {
 			// connect to remote or local topic
 			ic = getInitialContext(properties.get(REMOTE_JMS) != null);
 			cf = (ConnectionFactory) ic.lookup(jndiCF);
-			// Queue queue = (Queue) ic.lookup(destinationName);
-			Topic topic = (Topic) ic.lookup(jndiTopic);
+			Destination destination = null;
+			if(jndiTopic != null){
+				destination = (Topic) ic.lookup(jndiTopic);
+			} else {
+				destination = (Queue) ic.lookup(jndiQueue);
+			}
 			
 			
 			//give credentials for remote connection
@@ -236,7 +254,7 @@ public class Agent {
 			}
 			Session session = connection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
-			MessageProducer publisher = session.createProducer(topic);
+			MessageProducer publisher = session.createProducer(destination);
 			connection.start();
 
 			TextMessage message = session.createTextMessage(msg);

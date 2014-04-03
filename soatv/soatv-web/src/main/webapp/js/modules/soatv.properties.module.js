@@ -17,7 +17,8 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 	var pref = {
 			svg : {
 				width : 1300,
-				height : 800
+				height : 800,
+				backgroundColor: "#F8F8F8"
 			},
 			node : {
 				width : 200,

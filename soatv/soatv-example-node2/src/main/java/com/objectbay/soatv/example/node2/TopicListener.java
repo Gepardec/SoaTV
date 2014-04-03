@@ -28,6 +28,8 @@ public class TopicListener implements MessageListener{
 		}
 	}
 	
+	private static int count = 0;
+	
 	@Inject Event<TopicListenerOnMessageEvent> event;
 	@Inject Agent agent;
 	
@@ -36,10 +38,11 @@ public class TopicListener implements MessageListener{
 		try {
 			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 			.node("My JBoss 2")
-			.component("Topic Listener")
+			.component("Topic Listener" + count++)
 			.id(arg0.getJMSMessageID())
 			.status("received")
 			.send();
+			if(count > 4) count = 0;
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

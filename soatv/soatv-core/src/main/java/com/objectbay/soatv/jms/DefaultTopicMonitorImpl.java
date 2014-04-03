@@ -10,8 +10,6 @@ import javax.jms.TextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
-import com.objectbay.soatv.jms.TopicMonitorEvent.TopicMonitorEventType;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
 import com.objectbay.soatv.jms.messaging.MessageIO;
 import com.objectbay.soatv.utils.CDIUtils.DefaultComponentMessageIO;
@@ -28,29 +26,11 @@ public class DefaultTopicMonitorImpl extends TopicMonitor implements Serializabl
 	@Inject @DefaultComponentMessageIO
 	private MessageIO componentMessageReader;
 	@Override
-	public void onMessage(Message message) {
+	public synchronized void onMessage(Message message) {
 		try {
 			componentMessageReader.init(((TextMessage)message).getText());
 			ComponentMessage componentMessage = ComponentMessage.createMessage(componentMessageReader);
 			
-			MessageStatus status = componentMessage.getStatus();
-			if(status == MessageStatus.RECEIVED && !containsMessage(MessageStatus.SENT, componentMessage.getId())){
-				log.warn("Message with the status RECEIVED occured before message with the status SEND");
-				return;
-			}
-			
-			//check if node is new
-			if(!nodeExists(componentMessage.getSenderNodeId())){
-				notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_NODE, componentMessage.getSenderNodeId()));
-				notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, componentMessage));
-				addComponent(componentMessage.getSenderNodeId(), componentMessage.getSenderComponentId());
-			} else if(!componentExists(componentMessage.getSenderNodeId(), componentMessage.getSenderComponentId())){
-				notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, componentMessage));
-				addComponent(componentMessage.getSenderNodeId(), componentMessage.getSenderComponentId());
-			}
-			
-			TopicMonitorEventType type = status == MessageStatus.SENT ? TopicMonitorEventType.MESSAGE_SENT : TopicMonitorEventType.MESSAGE_RECEIVED;
-			notifyObservers(new TopicMonitorEvent(type, componentMessage));
 			addMessage(componentMessage);
 			
 			

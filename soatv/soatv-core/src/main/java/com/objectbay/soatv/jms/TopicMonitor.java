@@ -1,16 +1,20 @@
 package com.objectbay.soatv.jms;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Observer;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.jms.Message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
+import com.objectbay.soatv.jms.TopicMonitorEvent.TopicMonitorEventType;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
 import com.objectbay.soatv.utils.Notifier;
 
@@ -23,14 +27,21 @@ import com.objectbay.soatv.utils.Notifier;
  */
 public abstract class TopicMonitor {
 	
+	private static Logger log = LoggerFactory.getLogger(TopicMonitor.class);
+	
 	/**
 	 * List of nodes with components
 	 */
-	Map<String, Set<String>> nodes;
+	Hashtable<String, Set<String>> nodes;
 	/**
-	 * List of all received messages
+	 * List of all components with messages
 	 */
-	Map<MessageStatus, Map<String, ComponentMessage>> messages;
+	Hashtable<String, List<ComponentMessage>> components;
+	
+	/**
+	 * List of all messages by id
+	 */
+	Hashtable<String, List<ComponentMessage>> messages;
 	
 	/**
 	 * Notification service that notifies all observers about monitor events
@@ -38,8 +49,9 @@ public abstract class TopicMonitor {
 	Notifier notifier;
 	
 	public TopicMonitor() {
-		nodes = new HashMap<String, Set<String>>();
-		messages = new HashMap<MessageStatus, Map<String, ComponentMessage>>();
+		nodes = new Hashtable<String, Set<String>>();
+		messages = new Hashtable<String, List<ComponentMessage>>();
+		components = new Hashtable<String, List<ComponentMessage>>();
 		notifier = new Notifier();
 	}
 	
@@ -72,6 +84,7 @@ public abstract class TopicMonitor {
 		
 		if(!nodes.containsKey(name)){
 			nodes.put(name, new HashSet<String>());
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_NODE, name));
 		}
 		
 		return nodes.get(name);
@@ -104,6 +117,13 @@ public abstract class TopicMonitor {
 	public void addComponent(String nodeName, String componentName){
 		if(!componentExists(nodeName, componentName)){
 			getNodeComponents(nodeName).add(componentName);
+			
+			Properties props = new Properties();
+			props.put("node", nodeName);
+			props.put("component", componentName);
+			
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, props));
+			components.put(nodeName + componentName, new ArrayList<ComponentMessage>());
 		}
 	}
 	
@@ -112,67 +132,74 @@ public abstract class TopicMonitor {
 	}
 	
 	/**
-	 * Adds message to the topic messages if the message with the given
-	 * id does not exist
+	 * Adds message to the topic messages.
 	 * @param msg
 	 */
 	public void addMessage(ComponentMessage msg){
-		if(!messages.containsKey(msg.getStatus())){
-			messages.put(msg.getStatus(), new HashMap<String, ComponentMessage>());
-			messages.get(msg.getStatus()).put(msg.getId(), msg);
-		} else {
-			Map<String, ComponentMessage> statusMessages = messages.get(msg.getStatus());
-			if(!statusMessages.containsKey(msg.getId())){
-				statusMessages.put(msg.getId(), msg);
+		if(msg == null){
+			log.warn("Null message can not be added");
+			return;
+		}
+		// check whether it is not first "sent" message with the given id
+		String id = msg.getId();
+		if(containsMessages(id) && msg.getStatus() == MessageStatus.SENT){
+			for(ComponentMessage message : messages.get(id)){
+				if(message.hasStatus(MessageStatus.SENT)){
+					log.warn("Message with the id {} and status SENT already exists", id);
+					return;
+				}
 			}
 		}
+		
+		if(!componentExists(msg.getSenderNodeId(), msg.getSenderComponentId())){
+			addComponent(msg.getSenderNodeId(), msg.getSenderComponentId());
+		}
+		
+		//if it is first message
+		if(!containsMessages(id)){
+			messages.put(id, new ArrayList<ComponentMessage>());
+		}
+		
+		//if it is sent message
+		if(msg.getStatus() == MessageStatus.SENT){
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_SENT, msg));
+			// if there are "received" messages that were received earlier
+			for(ComponentMessage message : messages.get(id)){
+				notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_RECEIVED, message));
+			}
+		}
+		
+		//if it is received message
+		if(msg.getStatus() == MessageStatus.RECEIVED){
+			for(ComponentMessage message : messages.get(id)){
+				if(message.hasStatus(MessageStatus.SENT)){
+					notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_RECEIVED, msg));
+					break;
+				}
+			}
+		}
+		
+		messages.get(id).add(msg);
+		components.get(msg.getSenderNodeId() + msg.getSenderComponentId()).add(msg);
 	}
 	
 	/**
 	 * Returns List of messages with the given id
 	 * @param id
 	 */
-	public List<ComponentMessage> getMessages(String id){
-		List<ComponentMessage> result = new ArrayList<ComponentMessage>();
-		for(MessageStatus key : messages.keySet()){
-			Map<String, ComponentMessage> msgs = messages.get(key);
-			ComponentMessage candidate = msgs.get(id);
-			if(candidate != null){
-				result.add(candidate);
-			}
-		}
-		
-		return result;
+	public List<ComponentMessage> getMessages(String id){		
+		return messages.get(id);
 	}
-	
+		
 	/**
-	 * Identifies whether topic contains message with the given id and status
-	 * @param status
+	 * Identifies whether messages with the given id already exist
 	 * @param id
 	 * @return
 	 */
-	public boolean containsMessage(MessageStatus status, String id){
-		if(messages.get(status) == null){
-			return false;
-		}
-		
-		return messages.get(status).containsKey(id);
+	public boolean containsMessages(String id){
+		return id != null && messages.get(id) != null;
 	}
-	
-	/**
-	 * Returns message instance with the given status and id, if exists
-	 * @param status
-	 * @param id
-	 * @return
-	 */
-	public ComponentMessage getMessage(MessageStatus status, String id){
-		if(messages.get(status) == null){
-			return null;
-		}
 		
-		return messages.get(status).get(id);
-	}
-	
 	/**
 	 * Abstract message listener that is invoked when new message is registered in topic
 	 */

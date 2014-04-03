@@ -181,7 +181,7 @@ soatvApp.controller("MainCtrl", function($scope, soatv, soatvModel, soatvVisuali
 		
 		// add new application
 		if(message.action === "RESPONSE_NEW_COMPONENT"){
-			soatv.addComponent(message.data.senderComponentId, message.data.senderComponentId, message.data.senderNodeId);
+			soatv.addComponent(message.data.component, message.data.component, message.data.node);
 		};
 		
 		// add new message

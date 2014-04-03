@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Hashtable;
 
 import javax.inject.Inject;
 import javax.jms.Connection;
@@ -69,7 +68,7 @@ public class ClientServlet extends HttpServlet {
 		out.println("Messages sento to the JMS Provider: \n" + result);
 	}
 
-	private Connection sendMessage(String msg) {
+	private Connection sendMessage(String msg, int id) {
 
 		//String destinationName = "queue/sampleQueue";
 		String destinationName = "topic/soatvExampleTopic";
@@ -85,7 +84,7 @@ public class ClientServlet extends HttpServlet {
 			connection = cf.createConnection();
 			Session session = connection.createSession(false,
 					Session.AUTO_ACKNOWLEDGE);
-			MessageProducer publisher = session.createProducer(/*queue*/ topic);
+			MessageProducer publisher = session.createProducer( topic);
 
 			connection.start();
 
@@ -93,9 +92,16 @@ public class ClientServlet extends HttpServlet {
 			publisher.send(message);
 			
 			// notify soatv
-			agent
+			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			.node("My JBoss")
+			.component("Client Servlet")
+			.id(message.getJMSMessageID())
+			.status("sent")
+			.send();
+			
+			/*agent
 			// setup JNDI lookup
-			.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
+			.property(Context.PROVIDER_URL, "http-remoting://172.21.50.4:8080")
 			.property(Context.SECURITY_PRINCIPAL, "user")
 			.property(Context.SECURITY_CREDENTIALS, "user@123")
 			// setup topic access
@@ -107,10 +113,10 @@ public class ClientServlet extends HttpServlet {
 			.topic("/jms/topic/soatvTopic")
 			
 			.node("My JBoss")				// name of the node (e.g. jboss instance) that sends a message
-			.component("Client Servlet")	// name of the component (e.g. ws, servlet) that sends a message
-			.id(message.getJMSMessageID())	// unique id of message
+			.component("Client Servlet"+id)	// name of the component (e.g. ws, servlet) that sends a message
+			.id("msg"+id)	// unique id of message
 			.status("sent").send();			// status ("sent"||"received" : component has sent || received some business message
-			
+			*/
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		} finally {
@@ -153,14 +159,14 @@ public class ClientServlet extends HttpServlet {
 			try {
 				String content = readFile("/data/message"+Integer.toString(i)+".xml", ctx);
 				
-				sendMessage(content);
+				sendMessage(content, i);
 				System.out.println("Message sent: " + content);
 				buffer.append(content);
 				buffer.append(System.getProperty("line.separator"));
 				
 				//send reporting message
 				
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

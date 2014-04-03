@@ -163,15 +163,35 @@ VisElement = function(type, id) {
 	/**
 	 * Removes child with specific id
 	 */
-	VisElement.prototype.remove = function(id){
+	VisElement.prototype.removeChild = function(id){
 		var elem = this.find(id);
 		if(elem != null){
 			var index = this.children[id];
 			elem.d3Container.remove();
+			//remove visual children
+			elem.visualComponents.forEach(function(vComponent){
+				vComponent.remove();
+			});
+			
+			//remove children
+			for(id in elem.children){
+				elem.removeChild(id);
+			}
+			
 			this.children.splice(index, 1);
 			delete this.children[id];
 			this.reindex();
 		}
+	};
+	
+	/**
+	 * Removes itself
+	 */
+	VisElement.prototype.removeVisualization = function(){
+		this.d3Container.remove();
+		this.visualComponents.forEach(function(vComponent){
+			vComponent.remove();
+		});
 	};
 	
 	/**
@@ -389,74 +409,86 @@ VisElement.builders["message"] = {
 		var c = VisElement._getCenter(parentElement.d3Container);
 
 		visElement.d3Container = svg.append("circle").attr("cx", c.x).attr(
-				"cy", c.y).attr("r", prop.message.radius).attr("fill", color)
+				"cy", c.y).attr("r", prop.message.radius).attr("fill", prop.svg.backgroundColor)
 				.attr("stroke", color)
 				.attr("stroke-width", "2px")
 				.classed(classed);
 		
 		// adding padding
-		visElement.visualComponents.push(
+		/*visElement.visualComponents.push(
 				svg.append("circle").attr("cx", c.x).attr(
 						"cy", c.y).attr("r", prop.message.radius-2).attr("fill", "none")
 						.attr("stroke", prop.message.paddingColor)
 						.attr("stroke-width", prop.message.paddingWidth)
 						.classed(classed)
-		);
+		);*/
 
 		visElement.color = color;
 
 		visElement.moveTo = function(destination) {
-
-			// remember previous position
-			var prev = {
-				x : parseInt(visElement.d3Container.attr("cx")),
-				y : parseInt(visElement.d3Container.attr("cy"))
-			};
 			
-			 var interval = setInterval(function(){ var curr = {x :
-			 parseInt(visElement.d3Container.attr("cx")), y :
-			 parseInt(visElement.d3Container.attr("cy"))};
-			 
-			 /*var path = VisElement._vis._path(visElement.globals.svg, prev, curr, 
-					{
-				 		color : visElement.color,
-				 		width : "1px",
-				 		interpolate : "basis",
-				 		opacity : 0.5
-				 		
-				 	}
-			 );*/
-			 
-			 var path = VisElement._vis._line(visElement.globals.svg, prev, curr, 
-						{
-					 		color : visElement.color,
-					 		width : 1,
-					 		opacity : 0.5
-					 		
-					 	}
-				 );
-			 
-			 path.transition().remove(path).duration(8000).attr("stroke-opacity", 0); prev = curr; }, 5);
-			 
-
 			var onEnd = function() {
+				
 				if(VisElement._getDistance(destination.d3Container, visElement.d3Container) > 5){
 					to = VisElement._getCenter(destination.d3Container);
-					visElement.getTransition(onEnd, true).duration(2000).selectAll(".message"+id).attr("cx", to.x).attr("cy", to.y);
+					visElement.d3Container.transition().duration(2000).attr("cx", to.x).attr("cy", to.y)
+					.each("end", onEnd);
 				} else {
 					var index = visElement.parent.id2Child[visElement.id];
 					visElement.parent.children.splice(index, 1);
 					delete visElement.parent.id2Child[visElement.id];
-					destination.addVisElement(visElement);
+					//destination.addVisElement(visElement);
 					clearInterval(interval);
-					parentElement.remove(visElement.id);
+					clearInterval(destInterval);
+					visElement.removeVisualization();
+					
 				}
 
 			};
 
 			to = VisElement._getCenter(destination.d3Container);
 			from = VisElement._getCenter(visElement.d3Container);
-			visElement.getTransition(onEnd, true).duration(2000).selectAll(".message"+id).attr("cx", to.x).attr("cy", to.y);
+
+			// remember previous position
+			var prev = {
+				x : parseInt(visElement.d3Container.attr("cx")),
+				y : parseInt(visElement.d3Container.attr("cy"))
+			};
+
+			// remember previous destination
+			var prevDest = to;
+
+			var interval = setInterval(function() {
+				var curr = {
+					x : parseInt(visElement.d3Container.attr("cx")),
+					y : parseInt(visElement.d3Container.attr("cy"))
+				};
+
+				var path = VisElement._vis._line(visElement.globals.svg, prev,
+						curr, {
+							color : visElement.color,
+							width : 1,
+							opacity : 0.5
+
+						});
+			 
+			 path.transition().remove(path).duration(8000).attr("stroke-opacity", 0); prev = curr; }, 5);
+			
+			// control whether destination has changed its position
+			var destInterval = setInterval(function() {
+				var currDest = VisElement._getCenter(destination.d3Container);
+				if (VisElement._getDistance(currDest, prevDest, true) > 5) {
+					
+					visElement.d3Container.transition().duration(2000)
+							.attr("cx", currDest.x)
+							.attr("cy", currDest.y).each("end", onEnd);
+				}
+				prevDest = currDest;
+			 }, 500);
+			 
+			//visElement.getTransition(onEnd, true).duration(2000).selectAll(".message"+id).attr("cx", to.x).attr("cy", to.y);
+			visElement.d3Container.transition().duration(2000)./*selectAll(".message"+id).*/attr("cx", to.x).attr("cy", to.y)
+			.each("end", onEnd);
 		};
 
 	}
@@ -533,14 +565,18 @@ VisElement._getCenter = function(elem) {
 };
 
 /**
- * Returns distance between centers of two svg elements
+ * Returns distance between centers of two svg elements or two points (in this case points=true)
  * 
  * @param elem
  * @returns {}
  */
-VisElement._getDistance = function(elem1, elem2) {
-	var p1 = VisElement._getCenter(elem1);
-	var p2 = VisElement._getCenter(elem2);
+VisElement._getDistance = function(elem1, elem2, points) {
+	var p1 = elem1;
+	var p2 = elem2;
+	if(points !== true){
+		p1 = VisElement._getCenter(elem1);
+		p2 = VisElement._getCenter(elem2);
+	}
 	
 	var x = p1.x - p2.x;
 	var y = p1.y - p2.y;
