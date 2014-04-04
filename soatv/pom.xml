@@ -6,7 +6,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>soatv-camel</module>
 		<module>soatv-example-node1</module>
 		<module>soatv-web</module>
 		<module>soatv-core</module>
