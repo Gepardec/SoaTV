@@ -20,18 +20,21 @@
     <bpmn2:scriptTask id="ScriptTask_1" drools:selectable="true" name="Accept Request For Leave" scriptFormat="http://www.java.com/java">
       <bpmn2:incoming>bpmn20:SequenceFlow_2</bpmn2:incoming>
       <bpmn2:outgoing>bpmn20:SequenceFlow_4</bpmn2:outgoing>
-      <bpmn2:script>kcontext.setVariable(&quot;requestAccepted&quot;, true);
-
-System.out.println(&quot;Accept request for leave.&quot;);
+      <bpmn2:script>SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;AcceptRequestForLeave&quot;,&quot;received&quot;);
+kcontext.setVariable(&quot;requestAccepted&quot;, true);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;AcceptRequestForLeave&quot;,&quot;sent&quot;);
 </bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="SequenceFlow_2" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="days == 1" sourceRef="ExclusiveGateway_1" targetRef="ScriptTask_1">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_crIqILmDEeOXjd6pkhQgCQ" language="http://www.java.com/java"><![CDATA[return days == 1;]]></bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
-    <bpmn2:userTask id="UserTask_1" drools:selectable="true" drools:scriptFormat="http://www.java.com/java" name="Superior accepts or declines RFO">
+    <bpmn2:userTask id="UserTask_1" drools:selectable="true" drools:scriptFormat="http://www.java.com/java" name="Superior accepts or declines RFL">
       <bpmn2:extensionElements>
         <drools:onEntry-script scriptFormat="http://www.java.com/java">
-          <drools:script>System.out.println(&quot;Superior &quot; + superior + &quot; needs to accept or decline request for leave from &quot; + employee + &quot; with &quot; + days +&quot; days.&quot;);</drools:script>
+          <drools:script>System.out.println(&quot;Superior &quot; + superior + &quot; needs to accept or decline request for leave from &quot; + employee + &quot; with &quot; + days +&quot; days.&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;SuperiorAcceptsOrDeclinesRFL&quot;,&quot;received&quot;);
+
+</drools:script>
         </drools:onEntry-script>
         <drools:onExit-script scriptFormat="http://www.java.com/java">
           <drools:script>if(requestAccepted){
@@ -39,7 +42,8 @@ System.out.println(&quot;Accept request for leave.&quot;);
 }
 else{
 	System.out.println(superior + &quot; declines ROF from &quot; + employee + &quot; with &quot; +days+ &quot; days.&quot; );
-}</drools:script>
+}
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;SuperiorAcceptsOrDeclinesRFL&quot;,&quot;sent&quot;);</drools:script>
         </drools:onExit-script>
       </bpmn2:extensionElements>
       <bpmn2:incoming>bpmn20:SequenceFlow_3</bpmn2:incoming>
@@ -89,7 +93,7 @@ else{
       <bpmn2:extensionElements>
         <drools:onEntry-script scriptFormat="http://www.java.com/java">
           <drools:script>System.out.println(&quot;Employee &quot; + employee + &quot; wants to send a request for leave.test&quot;);
-SendMessageToTopic.send(&quot;HALLO&quot;);</drools:script>
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;SendRequestForLeave&quot;,&quot;sent&quot;);</drools:script>
         </drools:onEntry-script>
         <drools:onExit-script scriptFormat="http://www.java.com/java">
           <drools:script>System.out.println(&quot;Employee &quot; + employee + &quot; sends request for leave with &quot; + days + &quot; days.&quot;);</drools:script>
@@ -142,13 +146,18 @@ if(requestAccepted){
 else{
 	System.out.println(&quot;Request not accepted. Nothing to calculate&quot;);
 }
+
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;CalculateRestDays&quot;,&quot;received&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;CalculateRestDays&quot;,&quot;sent&quot;);
 </bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="SequenceFlow_10" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ExclusiveGateway_2" targetRef="ScriptTask_2"/>
     <bpmn2:scriptTask id="ScriptTask_3" drools:selectable="true" name="Notify employee" scriptFormat="http://www.java.com/java">
       <bpmn2:incoming>bpmn20:SequenceFlow_11</bpmn2:incoming>
       <bpmn2:outgoing>bpmn20:SequenceFlow_12</bpmn2:outgoing>
-      <bpmn2:script>System.out.println(&quot;Notify employee&quot;);</bpmn2:script>
+      <bpmn2:script>System.out.println(&quot;Notify employee&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;NotifyEmployee&quot;,&quot;received&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;NotifyEmployee&quot;,&quot;sent&quot;);</bpmn2:script>
     </bpmn2:scriptTask>
     <bpmn2:sequenceFlow id="SequenceFlow_11" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ScriptTask_2" targetRef="ScriptTask_3"/>
     <bpmn2:endEvent id="EndEvent_2" drools:bgcolor="#ff6347" drools:selectable="true" name="">

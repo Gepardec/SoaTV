@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.objectbay</groupId>
 	<artifactId>RequestForLeave</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>RequestLeave</name>
 	<description>Demo Application for SoaTV</description>
 	<dependencies>
@@ -13,6 +13,22 @@
 			<groupId>com.objectbay</groupId>
 			<artifactId>soatv-agent</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
+	<distributionManagement>
+		<repository>
+			<id>kie</id>
+			<name>Kie Repository</name>
+			<url>file:${kie-repository}</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-file</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+	</build>
 </project>
