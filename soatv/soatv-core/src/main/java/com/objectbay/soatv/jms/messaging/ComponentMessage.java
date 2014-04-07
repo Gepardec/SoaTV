@@ -1,6 +1,6 @@
 package com.objectbay.soatv.jms.messaging;
 
-import com.objectbay.soatv.agent.AgentMessage;
+import com.objectbay.soatv.agent.NotificationMessage;
 import com.objectbay.soatv.utils.MessageFieldUtils;
 
 
@@ -14,7 +14,7 @@ import com.objectbay.soatv.utils.MessageFieldUtils;
  * @author eerofeev
  *
  */
-public class ComponentMessage extends AgentMessage{
+public class ComponentMessage extends NotificationMessage{
 	
 	public ComponentMessage(String id) {
 		super(id);
@@ -29,8 +29,14 @@ public class ComponentMessage extends AgentMessage{
 	public static ComponentMessage createMessage(MessageIO reader){
 		ComponentMessage instance = new ComponentMessage(MessageFieldUtils.cleanValue((String)reader.readProperty("id")));
 		instance.setStatus(MessageFieldUtils.cleanValue((String)reader.readProperty("status")));
-		instance.setSenderNodeId(MessageFieldUtils.cleanValue((String)reader.readProperty("node")));
-		instance.setSenderComponentId(MessageFieldUtils.cleanValue((String)reader.readProperty("component")));
+		instance.setNode(MessageFieldUtils.cleanValue((String)reader.readProperty("node")));
+		
+		Component component = new Component();
+		component.setValue(MessageFieldUtils.cleanValue( ((Component)reader.readProperty("component")).getValue() ));
+		component.setType(MessageFieldUtils.cleanValue( ((Component)reader.readProperty("component")).getType() ));
+		instance.setComponent(component);
+		
+		instance.setBody(MessageFieldUtils.cleanValue((String)reader.readProperty("body")));
 		return instance;
 	}
 }

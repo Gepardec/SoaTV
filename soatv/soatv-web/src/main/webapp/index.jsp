@@ -8,6 +8,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="stylesheet" type="text/css" href="css/soatv.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
 <script src='js/lib/angular.js'></script>
 <script src='js/lib/d3js.js'></script>
@@ -27,12 +28,55 @@
 </head>
 <body ng-app="soatvApp">
 	<div ng-controller="MainCtrl">
-		<div id = "top">
-			<div id="connection"><img ng-src="{{connection.imageLink}}" ng-click="toggleConnection()">{{connection.message}}</div>
-			<hr id="top-separator"/>
+		<div id="top">
+			<div id="header">
+				<strong>JBoss</strong> Middleware Presentation
+			</div>
+			<div id="connection">
+				<img ng-src="{{connection.imageLink}}" ng-click="toggleConnection()">{{connection.message}}
+			</div>
+			<hr id="top-separator" />
 		</div>
-		<div id = "container">
-			<p class="tv" soatv-tv align="center"></p>
+		<div id="container" class="container">
+			<div class="row">
+				<div class="col-md-8">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">Visualization</h3>
+						</div>
+						<div class="panel-body">
+							<p class="tv" soatv-tv></p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">History</h3>
+						</div>
+						<div class="panel-body row" id="messages">
+							<div class="col-md-6" ng-repeat="message in topic">
+								<div class="message">
+									<div class = "message-header" style="background-color:#9C9C9C;">
+										Message
+										<div class = "message-header-color" style="background-color: {{message.color}}"></div>
+									</div>
+									<div class = "message-body">
+										<strong>ID: {{message.id}}</strong><br>
+										Sender : Sender<br>
+										Receiver : receiver
+										<hr style = "margin : 5px;">
+										BODY
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
 			<button ng-click="nextNode()">next node</button>
 			<button ng-click="nextAction()">next action</button>
 		</div>

@@ -82,11 +82,11 @@ public class MessagingContext implements Serializable, Observer {
 			case NEW_COMPONENT :
 				webSocketMessageIO.writeProperty("action", Action.RESPONSE_NEW_COMPONENT);
 				break;
-			case MESSAGE_SENT :
-				webSocketMessageIO.writeProperty("action", Action.RESPONSE_MESSAGE_SENT);
+			case NEW_MESSAGE :
+				webSocketMessageIO.writeProperty("action", Action.RESPONSE_NEW_MESSAGE);
 				break;
-			case MESSAGE_RECEIVED :
-				webSocketMessageIO.writeProperty("action", Action.RESPONSE_MESSAGE_RECEIVED);
+			case MESSAGE :
+				webSocketMessageIO.writeProperty("action", Action.RESPONSE_MESSAGE);
 				break;
 			}
 			

@@ -13,9 +13,8 @@ public class WebSocketMessage {
 		REQUEST_INIT,					// received init message from client
 		RESPONSE_NEW_NODE,				// 
 		RESPONSE_NEW_COMPONENT,			// 
-		RESPONSE_MESSAGE_SENT,			// 
-		RESPONSE_MESSAGE_RECEIVED,		// 
-		RESPONSE_MESSAGE_STATUS			// 
+		RESPONSE_NEW_MESSAGE,			// first occurance of message
+		RESPONSE_MESSAGE
 	};
 	
 	/**

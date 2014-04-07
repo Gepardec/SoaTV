@@ -1,9 +1,5 @@
 package com.objectbay.soatv.utils;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -20,14 +16,6 @@ public class MessageFieldUtils {
 	private static Logger log = LoggerFactory
 			.getLogger(MessageFieldUtils.class);
 
-	/**
-	 * Annotates field that can be commonly accessed via MessageFieldUtils
-	 * @author eerofeev
-	 *
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ElementType.FIELD})
-	public static @interface MessageField{}
 	
 	/**
 	 * Returns value of the object field qualified by name, if
@@ -38,7 +26,7 @@ public class MessageFieldUtils {
 	 */
 	public static Object getFieldValue(String field, Object target) {
 		for(Field f : FieldUtils.getAllFields(target.getClass())){
-			if(f.getName().equals(field) && f.isAnnotationPresent(MessageField.class)){
+			if(f.getName().equals(field)){
 				boolean accessible = f.isAccessible();
 				f.setAccessible(true);
 				try {
@@ -68,7 +56,7 @@ public class MessageFieldUtils {
 	 */
 	public static void setFieldValue(String field, Object value, Object target) {
 		for(Field f : FieldUtils.getAllFields(target.getClass())){
-			if(f.getName().equals(field) && f.isAnnotationPresent(MessageField.class)){
+			if(f.getName().equals(field)){
 				boolean accessible = f.isAccessible();
 				f.setAccessible(true);
 				try {
@@ -109,18 +97,11 @@ public class MessageFieldUtils {
 			Field[] fields = FieldUtils.getAllFields(source.getClass());
 			
 			for (Field f : fields) {
-				if(!f.isAnnotationPresent(MessageField.class)){
-					continue;
-				}
 				try {
 					boolean accessibleForF = f.isAccessible();
 					f.setAccessible(true);
 					
 					Field to = FieldUtils.getField(destination.getClass(), f.getName(), true);
-					
-					if(!to.isAnnotationPresent(MessageField.class)){
-						continue;
-					}
 					
 					boolean accessibleForTo = to.isAccessible();
 					to.setAccessible(true);

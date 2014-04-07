@@ -37,7 +37,7 @@ public class Agent {
 	public final static String REMOTE_TOPIC_PASSWORD = "remote_topic_password";
 
 	private String nodeName;
-	private String componentName;
+	private NotificationMessage.Component component;
 	private String messageId;
 	private String messageStatus;
 
@@ -113,8 +113,10 @@ public class Agent {
 	 * @param component
 	 * @return current instance of Agent
 	 */
-	public Agent component(String component) {
-		componentName = component;
+	public Agent component(String componentName, String type) {
+		component = new NotificationMessage.Component();
+		component.setType(type);
+		component.setValue(componentName);
 		return this;
 	}
 
@@ -128,15 +130,15 @@ public class Agent {
 		messageId = id;
 		return this;
 	}
-
+	
 	/**
-	 * Sets message status. Supports "sent" and "received"
+	 * Sets message status
 	 * 
 	 * @param status
 	 * @return current instance of Agent
 	 */
 	public Agent status(String status) {
-		messageStatus = status != null ? status.toUpperCase() : null;
+		messageStatus = status;
 		return this;
 	}
 
@@ -150,8 +152,8 @@ public class Agent {
 			return;
 		}
 
-		if (componentName == null) {
-			log.warn("Component name is not set, use component() for this. Message sending skipped");
+		if (component == null || component.getValue() == null) {
+			log.warn("Component is not set, use component() for this. Message sending skipped");
 			return;
 		}
 
@@ -160,14 +162,9 @@ public class Agent {
 			return;
 		}
 
-		if (messageStatus == null) {
-			log.warn("Message status is not set, use status() for this. Message sending skipped");
-			return;
-		}
-
-		AgentMessage message = new AgentMessage(messageId);
-		message.setSenderComponentId(componentName);
-		message.setSenderNodeId(nodeName);
+		NotificationMessage message = new NotificationMessage(messageId);
+		message.setComponent(component);
+		message.setNode(nodeName);
 		message.setStatus(messageStatus);
 
 		String msgString = message.toXMLString();

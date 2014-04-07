@@ -9,20 +9,7 @@ import java.io.IOException;
  *
  */
 public interface MessageIO {
-	
-	public static class MessageIOInitializationException extends RuntimeException{
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 		
-		public MessageIOInitializationException(String msg) {
-			super(msg);
-		}
-		
-	}
-	
 	/**
 	 * Initializes instance of MessageIO with the object representing message source, e.g. XML-string, JSON-string etc.
 	 * @param source

@@ -8,14 +8,14 @@ mock.actions = [
                 function(){mock.soatv.addNode("DB_Host", "DB_Host");},
                 function(){mock.soatv.addNode("Mail_Host", "Mail_Host");},
                 
-                function(){mock.soatv.addComponent("Money1", "Money1", "Money_Host");},
-                function(){mock.soatv.addComponent("Money2", "Money2", "Money_Host");},
+                function(){mock.soatv.addComponent("Money1", "Money1", "bean", "Money_Host");},
+                function(){mock.soatv.addComponent("Money2", "Money2", "bean", "Money_Host");},
                 
-                function(){mock.soatv.addComponent("DB1", "DB1", "DB_Host");},
-                function(){mock.soatv.addComponent("DB2", "DB2", "DB_Host");},
+                function(){mock.soatv.addComponent("DB1", "DB1", "bean", "DB_Host");},
+                function(){mock.soatv.addComponent("DB2", "DB2", "bean", "DB_Host");},
                 
-                function(){mock.soatv.addComponent("Mail1", "Mail1", "Mail_Host");},
-                function(){mock.soatv.addComponent("Mail2", "Mail2", "Mail_Host");},
+                function(){mock.soatv.addComponent("Mail1", "Mail1", "java", "Mail_Host");},
+                function(){mock.soatv.addComponent("Mail2", "Mail2", "java", "Mail_Host");},
                 
                 /*function(){mock.soatv.addNode("Money_Host2", "Money_Host2");},
                 function(){mock.soatv.addNode("DB_Host2", "DB_Host2");},
@@ -66,7 +66,8 @@ mock.createNextMessage = function(){
 				"m"+mock.currentMessage,
 				mock.messages[mock.currentMessage][0],
 				mock.messages[mock.currentMessage][1],
-				mock.messages[mock.currentMessage][4]
+				mock.messages[mock.currentMessage][4],
+				""
 		);
 		mock.currentMessage++;
 	} else {
@@ -77,10 +78,11 @@ mock.createNextMessage = function(){
 
 mock.receiveNextMessage = function(){
 	if(mock.currentMessage < mock.messages.length){
-		mock.soatv.receiveMessage(
+		mock.soatv.showMessagePass(
 				"m"+mock.currentMessage,
 				mock.messages[mock.currentMessage][2],
-				mock.messages[mock.currentMessage][3]
+				mock.messages[mock.currentMessage][3],
+				""
 		);
 		mock.currentMessage++;
 	}
@@ -98,7 +100,14 @@ soatvApp.filter('reverse', function() {
 	};
 });
 
-soatvApp.controller("MainCtrl", function($scope, soatv, soatvModel, soatvVisualization, soatvVisualizationProperties, soatvConnection) {
+soatvApp.controller("MainCtrl", function($scope,
+		soatv,
+		soatvModel,
+		soatvVisualization,
+		soatvVisualizationProperties,
+		soatvConnection,
+		soatvMessageBuffer
+		) {
 	mock.soatv = soatv;
 	$scope.topic = soatvModel.topic.orderedMessages;
 	
@@ -174,6 +183,21 @@ soatvApp.controller("MainCtrl", function($scope, soatv, soatvModel, soatvVisuali
 	 */
 	soatvApp.onmessage = function (message){
 		
+		var onMessagePassEnd = function(){
+			soatvMessageBuffer.unlock(message.data.id);
+		};
+		
+		soatvMessageBuffer.free = function (message){
+			$scope.$apply(function(){soatv.showMessagePass(
+					message.data.id,
+					message.data.node,
+					message.data.component.value,
+					message.data.body,
+					onMessagePassEnd
+			);
+			});
+		};
+		
 		// add new host
 		if(message.action === "RESPONSE_NEW_NODE"){
 			soatv.addNode(message.data, message.data);
@@ -181,25 +205,23 @@ soatvApp.controller("MainCtrl", function($scope, soatv, soatvModel, soatvVisuali
 		
 		// add new application
 		if(message.action === "RESPONSE_NEW_COMPONENT"){
-			soatv.addComponent(message.data.component, message.data.component, message.data.node);
+			soatv.addComponent(message.data.component, message.data.component, message.data.type, message.data.node);
 		};
 		
 		// add new message
-		if(message.action === "RESPONSE_MESSAGE_SENT"){
-			soatv.createNewMessage(
+		if(message.action === "RESPONSE_NEW_MESSAGE"){
+			$scope.$apply(function(){soatv.createNewMessage(
 					message.data.id,
-					message.data.senderNodeId,
-					message.data.senderComponentId
+					message.data.node,
+					message.data.component.value,
+					message.data.body
 			);
+			});
 		};
 		
 		// receive message
-		if(message.action === "RESPONSE_MESSAGE_RECEIVED"){
-			soatv.receiveMessage(
-					message.data.id,
-					message.data.senderNodeId,
-					message.data.senderComponentId
-			);
+		if(message.action === "RESPONSE_MESSAGE"){
+			soatvMessageBuffer.add(message, message.data.id);
 		};
 	};
 	

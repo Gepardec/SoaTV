@@ -16,21 +16,22 @@ var soatvPropertiesModule = angular.module('soatvPropertiesModule', []);
 soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 	var pref = {
 			svg : {
-				width : 1300,
+				width : 1000,
 				height : 800,
 				backgroundColor: "#F8F8F8"
 			},
 			node : {
 				width : 200,
-				height : 25,
-				backgroundColor : "#7D7D7D",
-				borderColor : "#7D7D7D",
+				height : 55,
+				backgroundColor : "#F8F8F8",
+				borderColor : "#AAAAAA",
 				borderWidth : 1,
-				topHeight : 25,
+				topHeight : 30,
 				"jboss" : {
-					topColor : "#7D7D7D",
+					topColor : "#9C9C9C",
+					topColorGrad : "#DEDEDE",
 					image : {link : "images/jbossas7.png", width : 16, height : 16},
-					textStyle : "fill: #E0E0E0; stroke: none;  font-size: 14px; font-family:'Monda';"
+					textStyle : "fill: #333333; stroke: none;  font-size: 14px; font-family:'Monda'; text-shadow: 0 0 1px #363636;"
 				},
 				"esb" : {
 					topColor : "#003666",
@@ -48,17 +49,21 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				borderRadius : 5,
 				backgroundColor : "#E0E0E0",
 				borderColor : "#7D7D7D",
-				borderWidth : 1,
+				borderWidth : "1px",
 				margin : 10,	//top margin
 				separatorPosition : 30,		// margin from top in px
-				ws : {
-					image : {link : "images/ws.png", width : 16, height : 16},
-					textStyle : "fill: #404040; stroke: none;  font-size: 12px; font-family:'Monda';"
+				bean : {
+					image : {link : "images/bean.png", width : 16, height : 16},
+					textStyle : "fill: #1058a1; stroke: none;  font-size: 12px; font-family:'Monda';"
+				},
+				java : {
+					image : {link : "images/java.png", width : 16, height : 16},
+					textStyle : "fill: #1058a1; stroke: none;  font-size: 12px; font-family:'Monda';"
 				}
 			},
 			
 			message : {
-				radius : 5,
+				radius : 3,
 				borderColor : "#404040",
 				borderWidth : 3,
 				paddingColor: "white",

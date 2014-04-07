@@ -1,8 +1,8 @@
 @import url(http://fonts.googleapis.com/css?family=Monda:700,400&subset=latin,latin-ext);
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,200);
 
 body {
 	font: 14px helvetica neue, helvetica, arial, sans-serif;
-	background-color: #EEE;
 }
 
 svg {
@@ -27,16 +27,19 @@ svg {
     margin-top : 40px;
     margin-right : 20px;
 }
+
 #top{
 	position : fixed;
 	width: 100%;
+	min-width: 300px;
 	top:0px;
-	right: 0px;
+	left: 0px;
 	height : 50px;
+	background-color: white;
+	z-index: 100;
 	
 	font-family: 'Monda', helvetica;
 	font-size: 16px;
-	background-color: #EEE;
 }
 
 #top img{
@@ -55,6 +58,63 @@ svg {
 	top : 5px;
 }
 
+#top #header {
+	font-size : 24px;
+	font-family : 'Source Sans Pro', sans-serif;
+	font-weight: lighter;
+	position: absolute;
+	left : 20px;
+	top: 4px;
+}
+
 #container {
 	margin-top : 60px;
+	width: 100%;
+	min-width : 1300px;
 }
+
+#messages {
+	max-height : 800px;
+	overflow: auto;
+}
+
+.panel-title{
+	font-family : 'Source Sans Pro', sans-serif;
+}
+
+.message {
+	border: 1px solid #CCCCCC;
+	padding : 1px;
+	margin-bottom : 10px;
+}
+
+.message-header{
+	color: #EEEEEE;
+	text-shadow: 0 0 1px #CCCCCC;
+	padding: 5px;
+	font-weight: bolder;
+	font-family: 'Monda', helvetica;
+	margin: 1px;
+	position: relative;
+}
+
+.message-header-color{
+	position: absolute;
+	width: 20px;
+	height: 100%;
+	right: 0px;
+	top: 0px;
+}
+
+.message-body {
+	padding : 5px;
+	font-family : 'Source Sans Pro', sans-serif;
+	font-size : 12px;
+}
+
+.message-body > strong {
+	font-size: 14px;
+	font-weight: bolder;
+	color: #1058a1;
+}
+

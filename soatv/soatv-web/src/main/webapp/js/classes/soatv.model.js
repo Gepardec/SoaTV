@@ -76,8 +76,9 @@ Message = function() {
 
 	this.body = null;
 	this.id = null;
-	this.component = null;
-	this.node = null;
+	this.components = [];
+	this.node = null;				// current node
+	this.component = null;			// current component
 	this.status = 0;
 	
 	/**
@@ -101,9 +102,11 @@ Message = function() {
  */
 Component = function() {	
 	this.id = null;
-	this.messages = {};
+	this.messages = {};	// maps messageId->messageIndex in ordered messages
+	this.orderedMessages = [];
 	this.node = null;
 	this.name = null;
+	this.type = null;
 
 	/**
 	 * Adds message to the message pool
@@ -115,28 +118,19 @@ Component = function() {
 	 * @returns
 	 */
 	Component.prototype.addMessage = function(message) {
-		message.setStatus(Message.STATUS_CREATED);
-		this.messages[message.id] = message;
-		this.node.controller.notification.notify(Controller.EVENT_COMPONENT_CREATED_MESSAGE, {component : this, message : message});
-	};
+		this.orderedMessages.push(message);
+		this.messages[message.id] = this.orderedMessages.length - 1;
+		message.components.push(this);
+		
+		var indexOfReceiver = message.components.length - 1;
+		//if it is first node of message
+		if(indexOfReceiver === 0){
+			this.node.controller.notification.notify(Controller.EVENT_COMPONENT_CREATED_MESSAGE, {component : this, message : message});
+		} else {
+			this.node.controller.notification.notify(Controller.EVENT_COMPONENT_RECEIVED_MESSAGE, {component : this, message : message});
+			//this.node.controller.notification.notify(Controller.EVENT_COMPONENT_RECEIVED_MESSAGE, {component : message.nodes[indexOfReceiver-1], message : message});
+		}
 	
-	/**
-	 * Removes message with the given id
-	 */
-	Component.prototype.removeMessage = function(messageId) {
-		delete this.messages[messageId];
-	};
-	
-	/**
-	 * Receives message from the topic and also deletes it from the previous component
-	 * @param message
-	 */
-	Component.prototype.receiveMessage = function(message) {
-		message.node = this.node;
-		message.component = this;
-		this.messages[message.id] = message;
-		message.setStatus(Message.STATUS_RECEIVED);
-		this.node.controller.notification.notify(Controller.EVENT_COMPONENT_RECEIVED_MESSAGE, {component : this, message : message});
 	};
 	
 	Component.prototype.getNumberOfMessages = function(){
@@ -156,14 +150,21 @@ MessageTopic = function() {
 	this.controller = null;
 
 	/**
-	 * Puts the message into the queue. This is the start of message life cycle
+	 * Puts the message into the topic and returns actiual instance of message
 	 */
 	MessageTopic.prototype.put = function(message) {
-		this.messages[message.id] = message;
-		this.orderedMessages.unshift(message);
-		this.controller.notification.notify(Controller.EVENT_TOPIC_ADDED_MESSAGE, {message : message});
-	
-		message.component.addMessage(message);
+		if(this.messages[message.id] == null){
+			this.messages[message.id] = message;
+			this.orderedMessages.unshift(message);
+			this.controller.notification.notify(Controller.EVENT_TOPIC_ADDED_MESSAGE, {message : message});
+			message.component.addMessage(message);
+			return message;
+		} else {
+			// add existing instance
+			message.component.addMessage(this.messages[message.id]);
+			return this.messages[message.id];
+		}
+		
 	};
 
 };

@@ -21,12 +21,10 @@ soatvMainModule.factory('soatv', function(
 		if(soatvModel.nodes[nodeId] != null){
 			console.log("Node with the given id " + nodeId + " already exists");
 		} else {
-			
 			var node = new Node();
-			node.name = nodeName;
 			node.id = nodeId;
+			node.name = nodeName;
 			soatvModel.addNode(node);
-			//soatvVisualization.builder.build("node", {type:"jboss", header : nodeName, id : nodeId});
 			soatvVisualization.container.add("node", nodeId, {type:"jboss", header : nodeName});
 		}
 	};
@@ -34,8 +32,9 @@ soatvMainModule.factory('soatv', function(
 	/**
 	 * Adds new component to the given node represents it on tv
 	 */
-	soatv.addComponent = function(componentId, componentName, nodeId){
-		if(soatvModel.nodes[nodeId] == null){
+	soatv.addComponent = function(componentId, componentName, componentType, nodeId){
+		var container = soatvVisualization.container;
+		if(container.find(nodeId) == null){
 			console.log("Node with the given id " + nodeId + " does not exist");
 		} else {
 			
@@ -44,9 +43,10 @@ soatvMainModule.factory('soatv', function(
 			var component = new Component();
 			component.id = componentId;
 			component.name = componentName;
+			component.type = componentType;
 			node.addComponent(component);
 			
-			soatvVisualization.container.find(nodeId).add("component", componentId, {type:"ws", header : componentName});
+			soatvVisualization.container.find(nodeId).add("component", componentId, {type:componentType, header : componentName});
 			
 		}
 	};
@@ -73,7 +73,7 @@ soatvMainModule.factory('soatv', function(
 		message.color = serviceRandomColor.generate();
 		soatvModel.topic.put(message);
 		//soatvVisualization.builder.build("message",{id : messageId, color : message.color, parent : parent});
-		soatvVisualization.container.find(nodeId).find(componentId).add("message", messageId, {color : message.color});
+		//soatvVisualization.container.find(nodeId).find(componentId).add("message", messageId, {color : color});
 	};
 	
 	/**
@@ -83,7 +83,7 @@ soatvMainModule.factory('soatv', function(
 	 * @param {String} componentId id of the component, where the message is located
 	 */
 	soatv.receiveMessage = function(messageId, nodeId, componentId){
-		var component = soatvModel.nodes[nodeId].components[componentId];
+		/*var component = soatvVisualization.container.find(nodeId).find(componentId)
 		
 		//identify original component
 		var originalComponent = soatvModel.topic.messages[messageId].component;
@@ -91,7 +91,7 @@ soatvMainModule.factory('soatv', function(
 		soatvModel.topic.messages[messageId].originalComponentId = originalComponent.id;
 		
 		soatvModel.topic.messages[messageId].originalComponent = originalComponent;
-		component.receiveMessage(soatvModel.topic.messages[messageId]);
+		component.receiveMessage(soatvModel.topic.messages[messageId]);*/
 		
 		var messageInstance = soatvVisualization.container.find(originalComponent.node.id).find(originalComponent.id).find(messageId);
 		
@@ -105,16 +105,28 @@ soatvMainModule.factory('soatv', function(
 	/**
 	 * Shows a sent message from one application to another.
 	 */
-	soatv.showMessagePass = function (messageId){
+	soatv.showMessagePass = function (messageId, nodeId, componentId, body, onEnd){
 		
+		var message = new Message();
+		message.id = messageId;
+		message.node = soatvModel.nodes[nodeId];
+		message.component = message.node.components[componentId];
+		message.body = body;
 		
-		/*var message = soatvModel.topic.messages[messageId];
-		if(message.originalComponent != null){	
-			var originalComponentId = message.originalComponent.id;
-			
-			soatvMessagePassAnimation.showMessagePass(originalComponentId, message.component.id, message.color);
-		}*/
+		//var node = soatvVisualization.vis.nodes[soatvVisualization.vis.ids[nodeId]];
+		//var parent = node.components[node.ids[componentId]];
 		
+		message = soatvModel.topic.put(message);
+				
+		var sender = message.components[message.components.length - 2];
+		var receiver = message.components[message.components.length - 1];
+		
+		soatvVisualization.container.find(sender.node.id).find(sender.id).add("message", messageId, {color : message.color});
+		
+		var messageVisualComponent = soatvVisualization.container.find(sender.node.id).find(sender.id).find(messageId);
+		var destination = soatvVisualization.container.find(receiver.node.id).find(receiver.id);
+		
+		messageVisualComponent.moveTo(destination, onEnd);
 	};
 	
 	/**
@@ -129,4 +141,48 @@ soatvMainModule.factory('soatv', function(
 	};
 	
 	return soatv;
+});
+
+soatvMainModule.factory('soatvMessageBuffer', function(){
+	var buffer = {content : {}};
+	
+	/**
+	 * Function that must perform forwarding of message for further processing,
+	 * when buffer allows it
+	 */
+	buffer.free = null;
+	
+	/**
+	 * Adds message into buffer
+	 */
+	buffer.add = function(message, messageId){
+		
+		if(buffer.content[messageId] == null){
+			buffer.content[messageId] = {locked : true, messages :[]};
+			buffer.free(message);
+		} else {
+			buffer.content[messageId].messages.push(message);
+			if(buffer.content[messageId].locked === false){
+				buffer.content[messageId].locked = true;
+				buffer.free(buffer.content[messageId].messages.shift());
+			}
+		}
+	};
+	
+	/**
+	 * unlock next message processing
+	 */
+	buffer.unlock = function(messageId) {
+		if(buffer.content[messageId] == null){
+			return;
+		}
+		if(buffer.content[messageId].messages.length > 0){
+			buffer.free(buffer.content[messageId].messages.shift());
+		} else {
+			buffer.content[messageId].locked = false;
+		}
+		
+	};
+	
+	return buffer;
 });

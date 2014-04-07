@@ -13,7 +13,7 @@ import javax.jms.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.objectbay.soatv.agent.AgentMessage.MessageStatus;
+import com.objectbay.soatv.agent.NotificationMessage.Component;
 import com.objectbay.soatv.jms.TopicMonitorEvent.TopicMonitorEventType;
 import com.objectbay.soatv.jms.messaging.ComponentMessage;
 import com.objectbay.soatv.utils.Notifier;
@@ -32,7 +32,7 @@ public abstract class TopicMonitor {
 	/**
 	 * List of nodes with components
 	 */
-	Hashtable<String, Set<String>> nodes;
+	Hashtable<String, Set<Component>> nodes;
 	/**
 	 * List of all components with messages
 	 */
@@ -49,7 +49,7 @@ public abstract class TopicMonitor {
 	Notifier notifier;
 	
 	public TopicMonitor() {
-		nodes = new Hashtable<String, Set<String>>();
+		nodes = new Hashtable<String, Set<Component>>();
 		messages = new Hashtable<String, List<ComponentMessage>>();
 		components = new Hashtable<String, List<ComponentMessage>>();
 		notifier = new Notifier();
@@ -77,13 +77,13 @@ public abstract class TopicMonitor {
 	 * @param name
 	 * @return
 	 */
-	public Set<String> getNodeComponents(String name){
+	public Set<Component> getNodeComponents(String name){
 		if(name == null){
 			return null;
 		}
 		
 		if(!nodes.containsKey(name)){
-			nodes.put(name, new HashSet<String>());
+			nodes.put(name, new HashSet<Component>());
 			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_NODE, name));
 		}
 		
@@ -106,7 +106,16 @@ public abstract class TopicMonitor {
 	 * @return
 	 */
 	public boolean componentExists(String nodeName, String componentName){
-		return (nodeExists(nodeName) && getNodeComponents(nodeName).contains(componentName));
+		if(!nodeExists(nodeName)){
+			return false;
+		}
+		for(Component c : getNodeComponents(nodeName)){
+			if(c.getValue().equals(componentName)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -114,16 +123,17 @@ public abstract class TopicMonitor {
 	 * @param nodeName
 	 * @param componentName
 	 */
-	public void addComponent(String nodeName, String componentName){
-		if(!componentExists(nodeName, componentName)){
-			getNodeComponents(nodeName).add(componentName);
+	public void addComponent(String nodeName, Component component){
+		if(!componentExists(nodeName, component.getValue())){
+			getNodeComponents(nodeName).add(component);
 			
 			Properties props = new Properties();
 			props.put("node", nodeName);
-			props.put("component", componentName);
+			props.put("component", component.getValue());
+			props.put("type", component.getType());
 			
 			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, props));
-			components.put(nodeName + componentName, new ArrayList<ComponentMessage>());
+			components.put(nodeName + component.getValue(), new ArrayList<ComponentMessage>());
 		}
 	}
 	
@@ -140,47 +150,30 @@ public abstract class TopicMonitor {
 			log.warn("Null message can not be added");
 			return;
 		}
-		// check whether it is not first "sent" message with the given id
+		
 		String id = msg.getId();
-		if(containsMessages(id) && msg.getStatus() == MessageStatus.SENT){
-			for(ComponentMessage message : messages.get(id)){
-				if(message.hasStatus(MessageStatus.SENT)){
-					log.warn("Message with the id {} and status SENT already exists", id);
-					return;
-				}
-			}
+		
+		if(id == null){
+			log.warn("Message with null id can not be added");
+			return;
 		}
 		
-		if(!componentExists(msg.getSenderNodeId(), msg.getSenderComponentId())){
-			addComponent(msg.getSenderNodeId(), msg.getSenderComponentId());
+		if(!componentExists(msg.getNode(), msg.getComponent().getValue())){
+			addComponent(msg.getNode(), msg.getComponent());
 		}
 		
 		//if it is first message
 		if(!containsMessages(id)){
 			messages.put(id, new ArrayList<ComponentMessage>());
-		}
-		
-		//if it is sent message
-		if(msg.getStatus() == MessageStatus.SENT){
-			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_SENT, msg));
-			// if there are "received" messages that were received earlier
-			for(ComponentMessage message : messages.get(id)){
-				notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_RECEIVED, message));
-			}
-		}
-		
-		//if it is received message
-		if(msg.getStatus() == MessageStatus.RECEIVED){
-			for(ComponentMessage message : messages.get(id)){
-				if(message.hasStatus(MessageStatus.SENT)){
-					notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE_RECEIVED, msg));
-					break;
-				}
-			}
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_MESSAGE, msg));
+		} else {
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.MESSAGE, msg));
 		}
 		
 		messages.get(id).add(msg);
-		components.get(msg.getSenderNodeId() + msg.getSenderComponentId()).add(msg);
+		components.get(msg.getNode() + msg.getComponent().getValue()).add(msg);
+		
+		
 	}
 	
 	/**

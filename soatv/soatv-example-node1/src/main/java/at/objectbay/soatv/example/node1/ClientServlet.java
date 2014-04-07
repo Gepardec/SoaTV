@@ -94,7 +94,7 @@ public class ClientServlet extends HttpServlet {
 			// notify soatv
 			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 			.node("My JBoss")
-			.component("Client Servlet")
+			.component("Client Servlet", "servlet")
 			.id(message.getJMSMessageID())
 			.status("sent")
 			.send();
@@ -155,23 +155,53 @@ public class ClientServlet extends HttpServlet {
 	private String sendMessages(ServletContext ctx){
 	StringBuffer buffer = new StringBuffer();
 		try {
-		for(int i = 0; i < 5; i++){
-			try {
-				String content = readFile("/data/message"+Integer.toString(i)+".xml", ctx);
+			
+			for(int i = 0; i < 5; i++){
+			
+			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			.node("My JBoss 3")
+			.component("Client Servlet", "servlet")
+			.id("m" + i)
+			.send();
 				
-				sendMessage(content, i);
-				System.out.println("Message sent: " + content);
-				buffer.append(content);
-				buffer.append(System.getProperty("line.separator"));
+			Thread.sleep(100);
+			
+			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			.node("My JBoss 4")
+			.component("JBN " + i, "bean")
+			.id("m" + i)
+			.send();
 				
-				//send reporting message
-				
-				Thread.sleep(100);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			Thread.sleep(100);
 			}
-		}
+
+		
+		for(int i = 0; i < 5; i++){
+			/*String content = readFile("/data/message"+Integer.toString(i)+".xml", ctx);
+			
+			sendMessage(content, i);
+			System.out.println("Message sent: " + content);
+			buffer.append(content);
+			buffer.append(System.getProperty("line.separator"));*/
+			
+			//send reporting message
+		
+		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+		.node("My JBoss")
+		.component("Client Servlet", "servlet")
+		.id("m")
+		.send();
+			
+		Thread.sleep(100);
+		
+		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+		.node("My JBoss2")
+		.component("JBN " + i, "bean")
+		.id("m")
+		.send();
+			
+		Thread.sleep(100);
+	}
 	} catch (InterruptedException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

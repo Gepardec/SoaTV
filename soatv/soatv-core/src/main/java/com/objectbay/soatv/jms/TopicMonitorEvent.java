@@ -10,8 +10,8 @@ public class TopicMonitorEvent {
 	public enum TopicMonitorEventType{
 		NEW_NODE,
 		NEW_COMPONENT,
-		MESSAGE_SENT,
-		MESSAGE_RECEIVED
+		NEW_MESSAGE,
+		MESSAGE
 	};
 	
 	private TopicMonitorEventType type;

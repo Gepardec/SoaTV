@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.objectbay.soatv.agent.NotificationMessage.Component;
 import com.objectbay.soatv.jms.messaging.MessageIO;
-import com.objectbay.soatv.jms.messaging.MessageIO.MessageIOInitializationException;
 import com.objectbay.soatv.jms.messaging.XMLComponentMessageReader;
 
 public class XMLComponentMessageReaderTest {
@@ -27,11 +27,11 @@ public class XMLComponentMessageReaderTest {
 		reader.init(testMessage);
 		assertEquals("testId", reader.readProperty("id"));
 		assertEquals("testNode", reader.readProperty("node"));
-		assertEquals("testComponent", reader.readProperty("component"));
+		assertEquals("testComponent", ((Component)reader.readProperty("component")).getValue());
 		assertEquals("SENT", reader.readProperty("status"));
 	}
 	
-	@Test(expected=MessageIOInitializationException.class)
+	@Test(expected=RuntimeException.class)
 	public void incorrectXMLInputThrowsException(){
 		reader.init(wrongTestMessage);
 	}
