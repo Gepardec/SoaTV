@@ -12,8 +12,8 @@ public class SendMessageToTopic {
 
 	private static Logger log = LoggerFactory.getLogger(SendMessageToTopic.class);
 	
-	public static void send(Long id,String node, String method){
-		log.info("SendMessageToTopic-"+id+": "+node+" "+method);		
+	public static void send(Long id,String node){
+		log.info("SendMessageToTopic-"+id+": "+node);		
 		Agent agent = new Agent();
 		agent	
 		.cf("/ConnectionFactory")
@@ -21,6 +21,6 @@ public class SendMessageToTopic {
 		.node(node)				
 		.component(node)	
 		.id(id.toString())	
-		.status(method).send();			
+		.send();			
 	}
 }
