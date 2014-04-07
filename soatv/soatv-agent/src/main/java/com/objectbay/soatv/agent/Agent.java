@@ -36,6 +36,8 @@ public class Agent {
 	public final static String REMOTE_TOPIC_USER_NAME = "remote_topic_user_name";
 	public final static String REMOTE_TOPIC_PASSWORD = "remote_topic_password";
 
+	private static final String DEFAULT_COMPONENT_TYPE = "java";
+
 	private String nodeName;
 	private NotificationMessage.Component component;
 	private String messageId;
@@ -118,6 +120,16 @@ public class Agent {
 		component.setType(type);
 		component.setValue(componentName);
 		return this;
+	}
+	
+	/**
+	 * Sets component name to be sent with the message with default type
+	 * 
+	 * @param component
+	 * @return current instance of Agent
+	 */
+	public Agent component(String componentName) {
+		return this.component(componentName, Agent.DEFAULT_COMPONENT_TYPE);
 	}
 
 	/**
