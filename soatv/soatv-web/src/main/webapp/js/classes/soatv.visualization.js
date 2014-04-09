@@ -16,9 +16,6 @@ VisElement = function(type, id) {
 	// children but part of compound element (e.g.
 	// images, stripes, ellipses etc.)
 
-	this.transition = null; // stores the transition instance for safety
-	// transition binding
-
 	/**
 	 * Common global elements for all children of the same svg
 	 */
@@ -129,38 +126,6 @@ VisElement = function(type, id) {
 	};
 
 	/**
-	 * Returns current transition instance or creates new one. Function takes
-	 * callback function as parameter that will be called at the transition end
-	 */
-	VisElement.prototype.getTransition = function(onEnd, global) {
-		var self = this;
-		var d3Elem = this.d3Container;
-		if (global === true) {
-			d3Elem = d3;
-		}
-		if (d3Elem == null) {
-			return null;
-		} else {
-			if (this.transition == null || this.transition.finished) {
-				var t = d3Elem.transition().each("end", function() {
-					onEnd();
-					t.finished = true;
-				});
-				t.finished = false;
-				self.transition = t;
-			} else {
-				var t = d3Elem.transition().each("end", function() {
-					onEnd();
-					t.finished = true;
-				});
-				t.finished = false;
-				self.transition = t;
-			}
-		}
-		return self.transition;
-	};
-
-	/**
 	 * Removes child with specific id
 	 */
 	VisElement.prototype.removeChild = function(id) {
@@ -202,9 +167,10 @@ VisElement.builders = {}; // list of builders
 VisElement.builders["svg"] = {
 	build : function(visElement, argsObject) {
 		visElement.d3Container = d3.select("#" + argsObject.containerId)
-				.append("svg").attr("width", "100%")
-				.attr("height", argsObject.properties.svg.height).attr("id",
-						visElement.id);
+				.append("svg")
+				.attr("width", "100%")
+				.attr("height", argsObject.properties.svg.height)
+				.attr("id", visElement.id);
 
 		visElement.d3Container.append("defs");
 
@@ -270,17 +236,24 @@ VisElement.builders["node"] = {
 		var x = prop.svg.width / 2;
 		var y = prop.svg.height / 2;
 
-		var margin = 4;
-		
-		// build gradients
-		var grad = svg.select("defs").append("linearGradient").attr("id",
-				nodeType + "Gradient").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+		//padding of content inside node
+		var padding = prop.node.padding;
 
-		grad.append("stop").attr("offset", "0").attr("stop-color",
-				prop.node[nodeType].topColorGrad);
-		
-		grad.append("stop").attr("offset", "1").attr("stop-color",
-				prop.node[nodeType].topColor);
+		// build gradients
+		var grad = svg.select("defs").append("linearGradient")
+		.attr("id", nodeType + "Gradient")
+		.attr("x1", "0%")
+		.attr("y1", "0%")
+		.attr("x2", "0%")
+		.attr("y2", "100%");
+
+		grad.append("stop")
+		.attr("offset", "0")
+		.attr("stop-color", prop.node[nodeType].topColorGrad);
+
+		grad.append("stop")
+		.attr("offset", "1")
+		.attr("stop-color", prop.node[nodeType].topColor);
 
 		visElement.d3Container = svg.append("rect").attr("x", x).attr("y", y)
 				.attr("width", prop.node.width)
@@ -290,20 +263,25 @@ VisElement.builders["node"] = {
 								+ prop.node.borderColor + ";stroke-width:"
 								+ prop.node.borderWidth + ";");
 
-		var stripeRect = svg.append("rect").attr("x", x + margin).attr("y",
-				y + margin).attr("width", prop.node.width - 2 * margin).attr(
-				"height", prop.node.topHeight).attr(
-				"style",
-				"fill:url(#"+nodeType+"Gradient);" + ";stroke: none;");
+		var stripeRect = svg.append("rect")
+		.attr("x", x + padding)
+		.attr("y", y + padding)
+		.attr("width", prop.node.width - 2 * padding)
+		.attr("height", prop.node.topHeight)
+		.attr("style", "fill:url(#" + nodeType + "Gradient);" + ";stroke: none;");
 
-		var img = svg.append("image").attr("x", x + margin + 5).attr("y",
-				y + margin + 5).attr("width", prop.node[nodeType].image.width)
-				.attr("height", prop.node[nodeType].image.height).attr(
-						"xlink:href", prop.node[nodeType].image.link);
+		var img = svg.append("image")
+		.attr("x", x + padding + 5)
+		.attr("y", y + padding + 5)
+		.attr("width", prop.node[nodeType].image.width)
+		.attr("height", prop.node[nodeType].image.height)
+		.attr("xlink:href", prop.node[nodeType].image.link);
 
-		var text = svg.append("text").attr("x", x + margin + 25).attr("y",
-				y + margin + 20).attr("style", prop.node[nodeType].textStyle)
-				.text(nodeHeader);
+		var text = svg.append("text")
+		.attr("x", x + padding + 25)
+		.attr("y", y + padding + 20)
+		.attr("style", prop.node[nodeType].textStyle)
+		.text(nodeHeader);
 
 		visElement.visualComponents.push(stripeRect);
 		visElement.visualComponents.push(img);
@@ -330,17 +308,12 @@ VisElement.builders["component"] = {
 		var svg = visElement.globals.svg;
 		var parentNode = visElement.parent;
 		var prop = visElement.globals.properties;
-		
-		var componentType = prop.component[argsObject.type] != null ? argsObject.type : "java";
+
+		var componentType = prop.component[argsObject.type] != null ? argsObject.type
+				: "java";
 
 		var mainRect = parentNode.d3Container;
-		// var mainHeight = parseInt(mainRect.attr("height"));
 
-		/*
-		 * mainRect.transition().attr("height", mainHeight +
-		 * prop.component.height + 7).duration(500).each("end",
-		 */
-		// var onEnd = function(){
 		// compute number of added children
 		var nrComponents = parentNode.children.indexOf(visElement) + 1;
 
@@ -349,54 +322,46 @@ VisElement.builders["component"] = {
 
 		var x = parseInt(parentNode.d3Container.attr("x"))
 				+ prop.component.margin;
-		var y = prop.node.topHeight + parseInt(parentNode.d3Container.attr("y")) + (nrComponents)
+		var y = prop.node.topHeight
+				+ parseInt(parentNode.d3Container.attr("y")) + (nrComponents)
 				* prop.component.margin + (nrComponents - 1)
 				* prop.component.height;
-		
-		/*visElement.d3Container = svg.append("rect").attr("x", x).attr("y", y)
-		.attr("width",
-				prop.component.width).attr("height", prop.component.height)
-				.attr(
-						"style",
-						"fill:" + prop.component.backgroundColor + ";stroke:"
-								+ prop.component.borderColor + ";stroke-width:"
-								+ prop.component.borderWidth + ";");*/
-		
-		visElement.d3Container = svg.append("rect").attr("x", x).attr("y", y)
-		.attr("width",
-				prop.component.width).attr("height", prop.component.height)
-				.attr(
-						"style",
-						"fill: none; stroke : none;");
 
-		var img = svg.append("image").attr("x", x + 5).attr("y", y + 4).attr(
-				"width", prop.component[componentType].image.width).attr(
-				"height", prop.component[componentType].image.height).attr(
-				"xlink:href", prop.component[componentType].image.link);
+		visElement.d3Container = svg.append("rect")
+		.attr("x", x)
+		.attr("y", y)
+		.attr("width", prop.component.width)
+		.attr("height", prop.component.height)
+		.attr("style", "fill: none; stroke : none;");
 
-		var text = svg.append("text").attr("x", x + 25).attr("y", y + 16).attr(
-				"style", prop.component[componentType].textStyle).text(
-				nodeHeader);
-		
-		if(nrComponents > 1){
-			var stripe = svg.append("line").attr("x1", x).attr("y1", y - prop.component.margin / 2)
-			.attr("x2", x + prop.component.width).attr("y2", y - prop.component.margin / 2)
-			.attr("style", "stroke : " + prop.component.borderColor + "; stroke-width: " +prop.component.borderWidth + "; stroke-dasharray: 10, 2;" );
+		var img = svg.append("image")
+		.attr("x", x + 5)
+		.attr("y", y + 4)
+		.attr("width", prop.component[componentType].image.width)
+		.attr("height", prop.component[componentType].image.height)
+		.attr("xlink:href", prop.component[componentType].image.link);
+
+		var text = svg.append("text")
+		.attr("x", x + 25)
+		.attr("y", y + 16)
+		.attr("style", prop.component[componentType].textStyle)
+		.text(nodeHeader);
+
+		if (nrComponents > 1) {
+			var stripe = svg.append("line").attr("x1", x).attr("y1",
+					y - prop.component.margin / 2).attr("x2",
+					x + prop.component.width).attr("y2",
+					y - prop.component.margin / 2).attr(
+					"style",
+					"stroke : " + prop.component.borderColor
+							+ "; stroke-width: " + prop.component.borderWidth
+							+ "; stroke-dasharray: 10, 2;");
 			visElement.visualComponents.push(stripe);
 		}
 		visElement.visualComponents.push(img);
 		visElement.visualComponents.push(text);
 
 		visElement.globals.force.start();
-		/*
-		 * };
-		 * 
-		 * tween = function(d, i, a){ return d3.interpolate(a,
-		 * parseInt(mainRect.attr("height")) + prop.component.height + 7); };
-		 * 
-		 * parentNode.getTransition(onEnd).attrTween("height",
-		 * tween).duration(500);
-		 */
 	}
 };
 
@@ -414,57 +379,46 @@ VisElement.builders["message"] = {
 		classed[messageClass] = true;
 		var prop = visElement.globals.properties;
 
-		// var gradId = "grad" + id;
-
-		// register gradient
-		/*
-		 * var grad = svg.select("defs").append("radialGradient").attr("id",
-		 * gradId).attr("cx", "50%").attr("cy", "50%").attr("r", "50%")
-		 * .attr("fx", "50%").attr("fy", "50%");
-		 * 
-		 * grad.append("stop").attr("offset", "10%").attr("style", "stop-color:" +
-		 * color + ";stop-opacity : 1");
-		 * 
-		 * grad.append("stop") // TODO REMOVE THIS SHIT AFTER FINISHING
-		 * .attr("offset", "100%").attr("style", "stop-color:white;stop-opacity :
-		 * 0");
-		 */
 		var c = VisElement._getCenter(parentElement.d3Container);
 
-		visElement.d3Container = svg.append("circle").attr("cx", c.x).attr(
-				"cy", c.y).attr("r", prop.message.radius).attr("fill",
-				prop.svg.backgroundColor).attr("stroke", color).attr(
-				"stroke-width", "2px").classed(classed);
-
-		// adding padding
-		/*
-		 * visElement.visualComponents.push( svg.append("circle").attr("cx",
-		 * c.x).attr( "cy", c.y).attr("r", prop.message.radius-2).attr("fill",
-		 * "none") .attr("stroke", prop.message.paddingColor)
-		 * .attr("stroke-width", prop.message.paddingWidth) .classed(classed) );
-		 */
+		visElement.d3Container = svg.append("circle")
+		.attr("cx", c.x)
+		.attr("cy", c.y)
+		.attr("r", prop.message.radius)
+		.attr("fill", prop.svg.backgroundColor)
+		.attr("stroke", color)
+		.attr("stroke-width", "2px")
+		.classed(classed);	// add class="message$ID"
 
 		visElement.color = color;
 
+		//transition to new destination
 		visElement.moveTo = function(destination, endCallBack) {
 
+			// function called on transition end
 			var onEnd = function() {
 
-				if (VisElement._getDistance(destination.d3Container,
-						visElement.d3Container) > 5) {
+				// destination may have been moved from its original position. if yes, perform another transition
+				if (VisElement._getDistance(destination.d3Container,visElement.d3Container) > 20)
+				{
 					to = VisElement._getCenter(destination.d3Container);
-					visElement.d3Container.transition().duration(2000).attr(
-							"cx", to.x).attr("cy", to.y).each("end", onEnd);
-				} else {
+					visElement.d3Container.transition()
+					.duration(prop.transition.subduration)
+					.attr("cx", to.x)
+					.attr("cy", to.y)
+					.each("end", onEnd);
+				} else {	//remove this message
 					var index = visElement.parent.id2Child[visElement.id];
 					visElement.parent.children.splice(index, 1);
 					delete visElement.parent.id2Child[visElement.id];
-					// destination.addVisElement(visElement);
+					
 					clearInterval(interval);
 					clearInterval(destInterval);
 					visElement.removeVisualization();
 					visElement.parent.removeChild(visElement.id);
-					if(endCallBack != null && typeof(endCallBack) === 'function'){
+					
+					//execute external callback
+					if (endCallBack != null && typeof (endCallBack) === 'function') {
 						endCallBack();
 					}
 				}
@@ -483,6 +437,7 @@ VisElement.builders["message"] = {
 			// remember previous destination
 			var prevDest = to;
 
+			// interval to draw trace
 			var interval = setInterval(function() {
 				var curr = {
 					x : parseInt(visElement.d3Container.attr("cx")),
@@ -493,53 +448,40 @@ VisElement.builders["message"] = {
 						curr, {
 							color : visElement.color,
 							width : 1,
-							opacity : 0.5
+							opacity : 1
 
 						});
 
-				path.transition().remove(path).duration(8000).attr(
-						"stroke-opacity", 0);
+				path.transition()
+				.remove(path)
+				.duration(prop.transition.traceDuration)
+				.attr("stroke-opacity", 0);
 				prev = curr;
 			}, 5);
 
 			// control whether destination has changed its position
 			var destInterval = setInterval(function() {
 				var currDest = VisElement._getCenter(destination.d3Container);
-				if (VisElement._getDistance(currDest, prevDest, true) > 5) {
+				if (VisElement._getDistance(currDest, prevDest, true) > 20) {
 
-					visElement.d3Container.transition().duration(2000).attr(
-							"cx", currDest.x).attr("cy", currDest.y).each(
-							"end", onEnd);
+					visElement.d3Container
+					.transition()
+					.duration(prop.transition.duration)
+					.attr("cx", currDest.x)
+					.attr("cy", currDest.y)
+					.each("end", onEnd);
 				}
 				prevDest = currDest;
 			}, 500);
 
-			// visElement.getTransition(onEnd,
-			// true).duration(2000).selectAll(".message"+id).attr("cx",
-			// to.x).attr("cy", to.y);
-			visElement.d3Container.transition().duration(2000)
-					./* selectAll(".message"+id). */attr("cx", to.x).attr("cy",
-							to.y).each("end", onEnd);
+			visElement.d3Container.transition().duration(prop.transition.duration)
+			.attr("cx", to.x)
+			.attr("cy", to.y)
+			.each("end", onEnd);
 		};
 
 	}
 };
-
-/*
- * VisElement.builders["phantom"] = { build : function(visElement, argsObject){
- * 
- * var prop = visElement.globals.properties;
- * 
- * visElement.fixed = true; //make it fixed for force visElement.x =
- * prop.svg.width/2; visElement.y = prop.svg.height/2; visElement.isPhantom =
- * true; visElement.getRadius = function(){ var w = prop.node.width; var h =
- * prop.node.esb.height;
- * 
- * return Math.sqrt(w * w + h * h) / 2; };
- * 
- * visElement.shiftTo = function(x, y){}; visElement.setCenterPosition =
- * function(x, y){}; } };
- */
 
 /**
  * Shifts svg element

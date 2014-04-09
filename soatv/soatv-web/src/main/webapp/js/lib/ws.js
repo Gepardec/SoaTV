@@ -38,10 +38,18 @@ var webSocket = {
 
 	listeners : [],
 
+	/**
+	 * Adds customer listener of websocket events
+	 * @param listener
+	 */
 	addListener : function(listener) {
 		webSocket.listeners.push(listener);
 	},
 
+	/**
+	 * Connects to the websocket endpoint
+	 * @param url
+	 */
 	connect : function(url) {
 		if (webSocket.ws != null)
 			return;
@@ -55,11 +63,15 @@ var webSocket = {
 		}
 	},
 
+	/**
+	 * Closes active connection
+	 */
 	close : function() {
 		if (webSocket.opened) {
 			webSocket.ws.close();
 		}
 	},
+	
 	onopen : function() {
 		console.log("Websocket connection established");
 		webSocket.opened = true;
@@ -67,6 +79,11 @@ var webSocket = {
 			listener.onopen();
 		});
 	},
+	
+	/**
+	 * Sends text message to the endpoint
+	 * @param msg
+	 */
 	send : function(msg) {
 		webSocket.ws.send(msg);
 		console.log('Sent message', msg);
@@ -77,6 +94,7 @@ var webSocket = {
 			listener.onmessage(wsMessage.parse(msg));
 		});
 	},
+	
 	onclose : function(msg) {
 		webSocket.ws = null;
 		webSocket.opened = false;
@@ -86,6 +104,7 @@ var webSocket = {
 		webSocket.listeners = [];
 		console.log("Websocket closed.");
 	},
+	
 	ws : null,
 	opened : false
 };

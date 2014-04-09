@@ -27,20 +27,13 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				borderColor : "#AAAAAA",
 				borderWidth : 1,
 				topHeight : 30,
+				padding : 4,
 				"jboss" : {
 					topColor : "#9C9C9C",
 					topColorGrad : "#DEDEDE",
 					image : {link : "images/jbossas7.png", width : 16, height : 16},
 					textStyle : "fill: #333333; stroke: none;  font-size: 14px; font-family:'Monda'; text-shadow: 0 0 1px #363636;"
 				},
-				"esb" : {
-					topColor : "#003666",
-					image : {link : "images/esbsm.png", width : 16, height : 16},
-					textStyle : "fill: #000000; stroke: none;  font-size: 14px; font-weight : bolder; font-family:monospace;",
-					heigth : 90,
-					ellipseRX : 10,
-					ellipseRY : 22
-				}
 			},
 			
 			component : {
@@ -74,7 +67,13 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				imageConnected : "images/icon_connected_green.png",
 				imageDisconnected : "images/icon_disconnected_red.png",
 				imageConnecting : "images/ajax-loader.gif"
+			},
+			transition : {
+				duration : 2000,	// how long message flies to destination
+				subduration : 500,	// correcting fly of the message if destination has changed its position
+				traceDuration : 8000		// how long trace disappears
 			}
+			
 		};
 	return pref;
 });

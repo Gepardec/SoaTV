@@ -66,44 +66,13 @@ soatvMainModule.factory('soatv', function(
 		message.component = message.node.components[componentId];
 		message.body = body;
 		
-		//var node = soatvVisualization.vis.nodes[soatvVisualization.vis.ids[nodeId]];
-		//var parent = node.components[node.ids[componentId]];
-		
 		//visualize message
 		message.color = serviceRandomColor.generate();
 		soatvModel.topic.put(message);
-		//soatvVisualization.builder.build("message",{id : messageId, color : message.color, parent : parent});
-		//soatvVisualization.container.find(nodeId).find(componentId).add("message", messageId, {color : color});
 	};
 	
 	/**
-	 * Simulates the process of receiving of a  message by component from the topic
-	 * @param {String} messageId id of the message
-	 * @param {String} nodeId id of the node, where message is received
-	 * @param {String} componentId id of the component, where the message is located
-	 */
-	soatv.receiveMessage = function(messageId, nodeId, componentId){
-		/*var component = soatvVisualization.container.find(nodeId).find(componentId)
-		
-		//identify original component
-		var originalComponent = soatvModel.topic.messages[messageId].component;
-		// extend message with the original component to visualize message pass later
-		soatvModel.topic.messages[messageId].originalComponentId = originalComponent.id;
-		
-		soatvModel.topic.messages[messageId].originalComponent = originalComponent;
-		component.receiveMessage(soatvModel.topic.messages[messageId]);*/
-		
-		var messageInstance = soatvVisualization.container.find(originalComponent.node.id).find(originalComponent.id).find(messageId);
-		
-		//var intermediateNode = soatvVisualization.vis.nodes[0];	// topic node
-		
-		var destinationNode = soatvVisualization.container.find(nodeId).find(componentId);
-		messageInstance.moveTo(destinationNode);
-		
-	};
-	
-	/**
-	 * Shows a sent message from one application to another.
+	 * Shows a sending message process from one component to another.
 	 */
 	soatv.showMessagePass = function (messageId, nodeId, componentId, body, onEnd){
 		
@@ -113,42 +82,45 @@ soatvMainModule.factory('soatv', function(
 		message.component = message.node.components[componentId];
 		message.body = body;
 		
-		//var node = soatvVisualization.vis.nodes[soatvVisualization.vis.ids[nodeId]];
-		//var parent = node.components[node.ids[componentId]];
-		
+		// puts message in the topic and received actual instance (if the same id already exists)
 		message = soatvModel.topic.put(message);
 				
 		var sender = message.components[message.components.length - 2];
 		var receiver = message.components[message.components.length - 1];
 		
-		soatvVisualization.container.find(sender.node.id).find(sender.id).add("message", messageId, {color : message.color});
+		soatvVisualization.container
+		.find(sender.node.id)
+		.find(sender.id)
+		.add("message", messageId, {color : message.color});
 		
-		var messageVisualComponent = soatvVisualization.container.find(sender.node.id).find(sender.id).find(messageId);
-		var destination = soatvVisualization.container.find(receiver.node.id).find(receiver.id);
+		var messageVisualComponent = soatvVisualization.container
+		.find(sender.node.id)
+		.find(sender.id)
+		.find(messageId);
+		
+		var destination = soatvVisualization.container
+		.find(receiver.node.id)
+		.find(receiver.id);
 		
 		messageVisualComponent.moveTo(destination, onEnd);
 	};
 	
-	/**
-	 * Hide a sent message from one application to another.
-	 */
-	soatv.hideMessagePass = function (messageId){
-		/*var message = soatvModel.topic.messages[messageId];
-		if(message.originalComponent != null){
-			var originalComponentId = message.originalComponent.id;		
-			soatvMessagePassAnimation.hideMessagePass(originalComponentId, message.component.id);
-		}*/
-	};
-	
 	return soatv;
+	
 });
 
+/**
+ * Service that provides message buffering. If message with the same id walking from one component
+ * to another to fast, this can't be visualized directly (message with the same id is moved simultaneously
+ * along multiple paths). Service allows to visulize such pass in the given sequence
+ */
 soatvMainModule.factory('soatvMessageBuffer', function(){
 	var buffer = {content : {}};
 	
 	/**
-	 * Function that must perform forwarding of message for further processing,
-	 * when buffer allows it
+	 * Abstract function that must perform forwarding of message for further processing,
+	 * when buffer allows it. Function is invoked when buffer identifies, that next message pass can be visualized
+	 * (e.g. if message is added in the empty buffer, or on processing next message in the queue)
 	 */
 	buffer.free = null;
 	
@@ -170,7 +142,7 @@ soatvMainModule.factory('soatvMessageBuffer', function(){
 	};
 	
 	/**
-	 * unlock next message processing
+	 * unlock next message processing. Must be called explicitly when current message pass visualization ends.
 	 */
 	buffer.unlock = function(messageId) {
 		if(buffer.content[messageId] == null){
