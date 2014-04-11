@@ -27,11 +27,6 @@ var soatvVisualizationModule = angular.module('soatvVisualizationModule', ['soat
 
 //auxiliary service to generate random color
 soatvVisualizationModule.factory('serviceRandomColor', function(){
-	/*return {
-		generate : function(){
-			return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
-		}
-	};*/
 	return{
 		generate : function(){
 		    var letters = '0123456789ABCDEF'.split('');
@@ -49,7 +44,7 @@ soatvVisualizationModule.factory('soatvVisualization', function(soatvVisualizati
 	var visualizer = {};
 	var prop = soatvVisualizationProperties;
 	/**
-	 * Performs initialization of visualizer and creates instance of cytoscape based
+	 * Performs initialization of visualizer and creates instance of svg based
 	 * on DOM-Element element, that will be used for rendering.
 	 */
 	visualizer.init = function(element) {
@@ -59,27 +54,36 @@ soatvVisualizationModule.factory('soatvVisualization', function(soatvVisualizati
 			properties : prop,
 			globals : {}
 		});
-		//visualizer.container.add("phantom", "phantom", {});
 	};
+	
 	return visualizer;
 });
 
+/**
+ * Provides connecting visualization with connecting spinner
+ */
 soatvVisualizationModule.factory('soatvConnection', function(soatvVisualizationProperties) {
 
 	var connection = {
 			connected : false,
+			/**
+			 * Retuns message that must be currently displayed.
+			 */
 			getMessage : function(){
-				if(connection.connected == null){
+				if(this.connected == null){
 					return " connecting";
 				} else {
-					return connection.connected ? " connected" : " disconnected";
+					return this.connected ? " connected" : " disconnected";
 				}
 			},
+			/**
+			 * Returns link to the image that must be currently displayed
+			 */
 			getImageLink : function(){
-				if(connection.connected == null){
+				if(this.connected == null){
 					return soatvVisualizationProperties.connection.imageConnecting;
 				} else {
-					return connection.connected ? 
+					return this.connected ? 
 							soatvVisualizationProperties.connection.imageConnected: 
 							soatvVisualizationProperties.connection.imageDisconnected;
 				}
