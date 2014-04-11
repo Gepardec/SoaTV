@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmn20="http://www.omg.org/bpmn20" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:bpsim="http://www.bpsim.org/schemas/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:drools="http://www.jboss.org/drools" xmlns="http://www.jboss.org/drools" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd http://www.jboss.org/drools drools.xsd http://www.bpsim.org/schemas/1.0 bpsim.xsd" id="_crDxobmDEeOXjd6pkhQgCQ" expressionLanguage="http://www.mvel.org/2.0" targetNamespace="http://www.omg.org/bpmn20" typeLanguage="http://www.java.com/javaTypes">
+  <bpmn2:itemDefinition id="_daysItem" structureRef="Integer"/>
+  <bpmn2:itemDefinition id="_employeeItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="_superiorItem" structureRef="String"/>
+  <bpmn2:itemDefinition id="_requestAcceptedItem" structureRef="Boolean"/>
+  <bpmn2:itemDefinition id="_UserTask_1_requestAcceptedOutputItem" structureRef="Boolean"/>
+  <bpmn2:itemDefinition id="_UserTask_2_daysOutputItem" structureRef="Integer"/>
+  <bpmn2:itemDefinition id="_UserTask_2_superiorOutputItem" structureRef="String"/>
+  <bpmn2:process id="RequestForLeave" drools:version="1.0" drools:packageName="com.objectbay.requestforleave" drools:adHoc="false" name="RequestForLeave" isExecutable="true">
+    <bpmn2:property id="days" itemSubjectRef="_daysItem"/>
+    <bpmn2:property id="employee" itemSubjectRef="_employeeItem"/>
+    <bpmn2:property id="superior" itemSubjectRef="_superiorItem"/>
+    <bpmn2:property id="requestAccepted" itemSubjectRef="_requestAcceptedItem"/>
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_1" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Diverging">
+      <bpmn2:incoming>bpmn20:SequenceFlow_8</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_2</bpmn2:outgoing>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_3</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:scriptTask id="ScriptTask_1" drools:selectable="true" name="Accept Request For Leave" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>bpmn20:SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_4</bpmn2:outgoing>
+      <bpmn2:script>kcontext.setVariable(&quot;requestAccepted&quot;, true);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;AcceptRequestForLeave&quot;);
+</bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="days == 1" sourceRef="ExclusiveGateway_1" targetRef="ScriptTask_1">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_crIqILmDEeOXjd6pkhQgCQ" language="http://www.java.com/java"><![CDATA[return days == 1;]]></bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:userTask id="UserTask_1" drools:selectable="true" drools:scriptFormat="http://www.java.com/java" name="Superior accepts or declines RFL">
+      <bpmn2:extensionElements>
+        <drools:onEntry-script scriptFormat="http://www.java.com/java">
+          <drools:script>System.out.println(&quot;Superior &quot; + superior + &quot; needs to accept or decline request for leave from &quot; + employee + &quot; with &quot; + days +&quot; days.&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;SuperiorAcceptsOrDeclinesRFL&quot;);
+
+</drools:script>
+        </drools:onEntry-script>
+        <drools:onExit-script scriptFormat="http://www.java.com/java">
+          <drools:script>if(requestAccepted){
+	System.out.println(superior + &quot; accepts ROF from &quot; + employee + &quot; with &quot; +days+ &quot; days.&quot; );
+}
+else{
+	System.out.println(superior + &quot; declines ROF from &quot; + employee + &quot; with &quot; +days+ &quot; days.&quot; );
+}</drools:script>
+        </drools:onExit-script>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>bpmn20:SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_5</bpmn2:outgoing>
+      <bpmn2:ioSpecification id="_crJRMLmDEeOXjd6pkhQgCQ">
+        <bpmn2:dataInput id="UserTask_1_TaskNameInput" name="TaskName"/>
+        <bpmn2:dataOutput id="UserTask_1_requestAcceptedOutput" drools:dtype="Boolean" itemSubjectRef="_UserTask_1_requestAcceptedOutputItem" name="requestAccepted"/>
+        <bpmn2:inputSet id="_crJRMbmDEeOXjd6pkhQgCQ">
+          <bpmn2:dataInputRefs>UserTask_1_TaskNameInput</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet id="_crJRMrmDEeOXjd6pkhQgCQ">
+          <bpmn2:dataOutputRefs>UserTask_1_requestAcceptedOutput</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+      <bpmn2:dataInputAssociation id="_crJRM7mDEeOXjd6pkhQgCQ">
+        <bpmn2:targetRef>UserTask_1_TaskNameInput</bpmn2:targetRef>
+        <bpmn2:assignment id="_crJRNLmDEeOXjd6pkhQgCQ">
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression" id="_crJRNbmDEeOXjd6pkhQgCQ">SuperiorDecides</bpmn2:from>
+          <bpmn2:to xsi:type="bpmn2:tFormalExpression" id="_crJRNrmDEeOXjd6pkhQgCQ">UserTask_1_TaskNameInput</bpmn2:to>
+        </bpmn2:assignment>
+      </bpmn2:dataInputAssociation>
+      <bpmn2:dataOutputAssociation id="_crJRN7mDEeOXjd6pkhQgCQ">
+        <bpmn2:sourceRef>UserTask_1_requestAcceptedOutput</bpmn2:sourceRef>
+        <bpmn2:targetRef>requestAccepted</bpmn2:targetRef>
+      </bpmn2:dataOutputAssociation>
+      <bpmn2:potentialOwner id="_crJ4QLmDEeOXjd6pkhQgCQ">
+        <bpmn2:resourceAssignmentExpression id="_crJ4QbmDEeOXjd6pkhQgCQ">
+          <bpmn2:formalExpression id="_crJ4QrmDEeOXjd6pkhQgCQ">#{superior}</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:potentialOwner>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="days > 1" sourceRef="ExclusiveGateway_1" targetRef="UserTask_1">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression" id="_crJ4Q7mDEeOXjd6pkhQgCQ" language="http://www.java.com/java"><![CDATA[return days > 1;]]></bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_2" drools:bgcolor="#f0e68c" drools:selectable="true" drools:bordercolor="#a67f00" drools:dg="" name="" gatewayDirection="Converging">
+      <bpmn2:incoming>bpmn20:SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:incoming>bpmn20:SequenceFlow_5</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_10</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:sequenceFlow id="SequenceFlow_4" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ScriptTask_1" targetRef="ExclusiveGateway_2"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_5" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="UserTask_1" targetRef="ExclusiveGateway_2"/>
+    <bpmn2:startEvent id="processStartEvent" drools:bgcolor="#9acd32" drools:selectable="true" name="">
+      <bpmn2:outgoing>bpmn20:SequenceFlow_7</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:sequenceFlow id="SequenceFlow_7" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="processStartEvent" targetRef="UserTask_2"/>
+    <bpmn2:userTask id="UserTask_2" drools:selectable="true" drools:scriptFormat="http://www.java.com/java" name="Send Request for Leave">
+      <bpmn2:extensionElements>
+        <drools:onEntry-script scriptFormat="http://www.java.com/java">
+          <drools:script>System.out.println(&quot;Employee &quot; + employee + &quot; wants to send a request for leave.test&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;SendRequestForLeave&quot;);</drools:script>
+        </drools:onEntry-script>
+        <drools:onExit-script scriptFormat="http://www.java.com/java">
+          <drools:script>System.out.println(&quot;Employee &quot; + employee + &quot; sends request for leave with &quot; + days + &quot; days.&quot;);</drools:script>
+        </drools:onExit-script>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>bpmn20:SequenceFlow_7</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_8</bpmn2:outgoing>
+      <bpmn2:ioSpecification id="_crJ4RLmDEeOXjd6pkhQgCQ">
+        <bpmn2:dataInput id="UserTask_2_TaskNameInput" name="TaskName"/>
+        <bpmn2:dataOutput id="UserTask_2_daysOutput" drools:dtype="Integer" itemSubjectRef="_UserTask_2_daysOutputItem" name="days"/>
+        <bpmn2:dataOutput id="UserTask_2_superiorOutput" drools:dtype="String" itemSubjectRef="_UserTask_2_superiorOutputItem" name="superior"/>
+        <bpmn2:inputSet id="_crJ4RbmDEeOXjd6pkhQgCQ">
+          <bpmn2:dataInputRefs>UserTask_2_TaskNameInput</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet id="_crKfULmDEeOXjd6pkhQgCQ">
+          <bpmn2:dataOutputRefs>UserTask_2_daysOutput</bpmn2:dataOutputRefs>
+          <bpmn2:dataOutputRefs>UserTask_2_superiorOutput</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+      <bpmn2:dataInputAssociation id="_crKfUbmDEeOXjd6pkhQgCQ">
+        <bpmn2:targetRef>UserTask_2_TaskNameInput</bpmn2:targetRef>
+        <bpmn2:assignment id="_crKfUrmDEeOXjd6pkhQgCQ">
+          <bpmn2:from xsi:type="bpmn2:tFormalExpression" id="_crKfU7mDEeOXjd6pkhQgCQ">SendRequestForLeave</bpmn2:from>
+          <bpmn2:to xsi:type="bpmn2:tFormalExpression" id="_crKfVLmDEeOXjd6pkhQgCQ">UserTask_2_TaskNameInput</bpmn2:to>
+        </bpmn2:assignment>
+      </bpmn2:dataInputAssociation>
+      <bpmn2:dataOutputAssociation id="_crKfVbmDEeOXjd6pkhQgCQ">
+        <bpmn2:sourceRef>UserTask_2_daysOutput</bpmn2:sourceRef>
+        <bpmn2:targetRef>days</bpmn2:targetRef>
+      </bpmn2:dataOutputAssociation>
+      <bpmn2:dataOutputAssociation id="_crKfVrmDEeOXjd6pkhQgCQ">
+        <bpmn2:sourceRef>UserTask_2_superiorOutput</bpmn2:sourceRef>
+        <bpmn2:targetRef>superior</bpmn2:targetRef>
+      </bpmn2:dataOutputAssociation>
+      <bpmn2:potentialOwner id="_crKfV7mDEeOXjd6pkhQgCQ">
+        <bpmn2:resourceAssignmentExpression id="_crKfWLmDEeOXjd6pkhQgCQ">
+          <bpmn2:formalExpression id="_crKfWbmDEeOXjd6pkhQgCQ">#{employee}</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:potentialOwner>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_8" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="UserTask_2" targetRef="ExclusiveGateway_1"/>
+    <bpmn2:scriptTask id="ScriptTask_2" drools:selectable="true" name="Calculate rest days" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>bpmn20:SequenceFlow_10</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_11</bpmn2:outgoing>
+      <bpmn2:script>System.out.println(&quot;Calculate rest days.&quot;);
+
+if(requestAccepted){
+	System.out.println(&quot;Remove &quot; + days + &quot; days.&quot; );
+}
+else{
+	System.out.println(&quot;Request not accepted. Nothing to calculate&quot;);
+}
+
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;CalculateRestDays&quot;);
+
+</bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_10" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ExclusiveGateway_2" targetRef="ScriptTask_2"/>
+    <bpmn2:scriptTask id="ScriptTask_3" drools:selectable="true" name="Notify employee" scriptFormat="http://www.java.com/java">
+      <bpmn2:incoming>bpmn20:SequenceFlow_11</bpmn2:incoming>
+      <bpmn2:outgoing>bpmn20:SequenceFlow_12</bpmn2:outgoing>
+      <bpmn2:script>System.out.println(&quot;Notify employee&quot;);
+SendMessageToTopic.send(kcontext.getProcessInstance().getId(),&quot;NotifyEmployee&quot;);
+</bpmn2:script>
+    </bpmn2:scriptTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_11" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ScriptTask_2" targetRef="ScriptTask_3"/>
+    <bpmn2:endEvent id="EndEvent_2" drools:bgcolor="#ff6347" drools:selectable="true" name="">
+      <bpmn2:incoming>bpmn20:SequenceFlow_12</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="SequenceFlow_12" drools:priority="1" drools:bgcolor="#000000" drools:selectable="true" name="" sourceRef="ScriptTask_3" targetRef="EndEvent_2"/>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="_crLGYLmDEeOXjd6pkhQgCQ">
+    <bpmndi:BPMNPlane id="_crLGYbmDEeOXjd6pkhQgCQ" bpmnElement="RequestForLeave">
+      <bpmndi:BPMNShape id="_crLGYrmDEeOXjd6pkhQgCQ" bpmnElement="ExclusiveGateway_1">
+        <dc:Bounds height="40.0" width="40.0" x="259.0" y="215.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLGY7mDEeOXjd6pkhQgCQ" bpmnElement="ScriptTask_1">
+        <dc:Bounds height="50.0" width="110.0" x="409.0" y="210.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLtcLmDEeOXjd6pkhQgCQ" bpmnElement="UserTask_1">
+        <dc:Bounds height="50.0" width="110.0" x="409.0" y="310.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLtcrmDEeOXjd6pkhQgCQ" bpmnElement="ExclusiveGateway_2">
+        <dc:Bounds height="40.0" width="40.0" x="599.0" y="215.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLtdbmDEeOXjd6pkhQgCQ" bpmnElement="processStartEvent">
+        <dc:Bounds height="30.0" width="30.0" x="30.0" y="220.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLtd7mDEeOXjd6pkhQgCQ" bpmnElement="UserTask_2">
+        <dc:Bounds height="50.0" width="110.0" x="100.0" y="210.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLtebmDEeOXjd6pkhQgCQ" bpmnElement="ScriptTask_2">
+        <dc:Bounds height="50.0" width="110.0" x="749.0" y="210.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crLte7mDEeOXjd6pkhQgCQ" bpmnElement="ScriptTask_3">
+        <dc:Bounds height="50.0" width="110.0" x="964.0" y="210.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_crMUgbmDEeOXjd6pkhQgCQ" bpmnElement="EndEvent_2">
+        <dc:Bounds height="28.0" width="28.0" x="1145.0" y="220.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="_crLGZLmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_2" sourceElement="_crLGYrmDEeOXjd6pkhQgCQ" targetElement="_crLGY7mDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="279.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="351.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="351.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="464.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLtcbmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_3" sourceElement="_crLGYrmDEeOXjd6pkhQgCQ" targetElement="_crLtcLmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="279.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="279.0" y="335.0"/>
+        <di:waypoint xsi:type="dc:Point" x="464.0" y="335.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLtc7mDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_4" sourceElement="_crLGY7mDEeOXjd6pkhQgCQ" targetElement="_crLtcrmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="464.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="552.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="552.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="619.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLtdLmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_5" sourceElement="_crLtcLmDEeOXjd6pkhQgCQ" targetElement="_crLtcrmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="464.0" y="335.0"/>
+        <di:waypoint xsi:type="dc:Point" x="619.0" y="335.0"/>
+        <di:waypoint xsi:type="dc:Point" x="619.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLtdrmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_7" sourceElement="_crLtdbmDEeOXjd6pkhQgCQ" targetElement="_crLtd7mDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="45.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="78.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="78.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="155.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLteLmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_8" sourceElement="_crLtd7mDEeOXjd6pkhQgCQ" targetElement="_crLGYrmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="155.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="229.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="229.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="279.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crLtermDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_10" sourceElement="_crLtcrmDEeOXjd6pkhQgCQ" targetElement="_crLtebmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="619.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="691.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="691.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="804.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crMUgLmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_11" sourceElement="_crLtebmDEeOXjd6pkhQgCQ" targetElement="_crLte7mDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="804.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="906.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="906.0" y="234.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1019.0" y="235.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="_crMUgrmDEeOXjd6pkhQgCQ" bpmnElement="SequenceFlow_12" sourceElement="_crLte7mDEeOXjd6pkhQgCQ" targetElement="_crMUgbmDEeOXjd6pkhQgCQ">
+        <di:waypoint xsi:type="dc:Point" x="1019.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1104.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1104.0" y="235.0"/>
+        <di:waypoint xsi:type="dc:Point" x="1159.0" y="234.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
