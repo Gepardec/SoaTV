@@ -6,7 +6,23 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>RequestForLeave</module>
+		<module>jbpm</module>
 		<module>soatv</module>
 	</modules>
+	<distributionManagement>
+		<repository>
+			<id>kie</id>
+			<name>Kie Repository</name>
+			<url>file:${kie-repository}</url>
+		</repository>
+	</distributionManagement>
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-file</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+	</build>
 </project>
