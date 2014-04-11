@@ -92,16 +92,16 @@ public class ClientServlet extends HttpServlet {
 			publisher.send(message);
 			
 			// notify soatv
-			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			/*agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 			.node("My JBoss")
 			.component("Client Servlet", "servlet")
 			.id(message.getJMSMessageID())
 			.status("sent")
-			.send();
+			.send();*/
 			
-			/*agent
+			agent
 			// setup JNDI lookup
-			.property(Context.PROVIDER_URL, "http-remoting://172.21.50.4:8080")
+			.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
 			.property(Context.SECURITY_PRINCIPAL, "user")
 			.property(Context.SECURITY_CREDENTIALS, "user@123")
 			// setup topic access
@@ -116,7 +116,7 @@ public class ClientServlet extends HttpServlet {
 			.component("Client Servlet"+id)	// name of the component (e.g. ws, servlet) that sends a message
 			.id("msg"+id)	// unique id of message
 			.status("sent").send();			// status ("sent"||"received" : component has sent || received some business message
-			*/
+			
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		} finally {
@@ -156,27 +156,42 @@ public class ClientServlet extends HttpServlet {
 	StringBuffer buffer = new StringBuffer();
 		try {
 			
-			for(int i = 0; i < 5; i++){
+			/*agent
+			// setup JNDI lookup
+			.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
+			.property(Context.SECURITY_PRINCIPAL, "user")
+			.property(Context.SECURITY_CREDENTIALS, "user@123")
+			// setup topic access
+			.property(Agent.REMOTE_JMS, "true")
+			.property(Agent.REMOTE_TOPIC_USER_NAME, "user")
+			.property(Agent.REMOTE_TOPIC_PASSWORD, "user@123")
+			//setup addresses
+			.cf("/jms/RemoteConnectionFactory")
+			.topic("/jms/topic/soatvTopic");*/
+			
+			for(int i = 0; i < 10; i++){
 			
 			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+
 			.node("My JBoss 3")
 			.component("Client Servlet", "servlet")
-			.id("m" + i)
+			.id("m" + (i))
 			.send();
 				
-			Thread.sleep(100);
+			//Thread.sleep(100);
 			
-			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			//agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+				agent
 			.node("My JBoss 4")
 			.component("JBN " + i, "bean")
-			.id("m" + i)
+			.id("m" + (i))
 			.send();
 				
-			Thread.sleep(100);
+			//Thread.sleep(100);
 			}
 
 		
-		for(int i = 0; i < 5; i++){
+		for(int i = 0; i < 0; i++){
 			/*String content = readFile("/data/message"+Integer.toString(i)+".xml", ctx);
 			
 			sendMessage(content, i);
@@ -189,7 +204,8 @@ public class ClientServlet extends HttpServlet {
 		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 		.node("My JBoss")
 		.component("Client Servlet", "servlet")
-		.id("m")
+		.id("msawegwgaw443345agaergey4y43y43y")
+		.body("boddy"+i)
 		.send();
 			
 		Thread.sleep(100);
@@ -197,10 +213,11 @@ public class ClientServlet extends HttpServlet {
 		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 		.node("My JBoss2")
 		.component("JBN " + i, "bean")
-		.id("m")
+		.id("msawegwgaw443345agaergey4y43y43y")
+		.body("boddy"+i)
 		.send();
 			
-		Thread.sleep(100);
+		//Thread.sleep(100);
 	}
 	} catch (InterruptedException e) {
 		// TODO Auto-generated catch block

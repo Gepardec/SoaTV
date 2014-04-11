@@ -4,6 +4,7 @@ import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -12,7 +13,9 @@ import javax.jms.TextMessage;
 @MessageDriven(name = "MessageMDBSample", activationConfig = {
 @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Topic"),
 @ActivationConfigProperty(propertyName = "destination", propertyValue = "topic/soatvTopic"),
-@ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+@ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge"),
+@ActivationConfigProperty(propertyName = "maxSession", propertyValue = "1")})
+@Singleton
 public class TopicListener implements MessageListener{
 	
 	public class TopicListenerOnMessageEvent{
@@ -31,6 +34,7 @@ public class TopicListener implements MessageListener{
 	
 	public void onMessage(Message arg0) {		
 		try {
+			//System.out.println("MDB Instance: " + this);
 			System.out.println("SOATV received a message: " + ((TextMessage)arg0).getText());
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block

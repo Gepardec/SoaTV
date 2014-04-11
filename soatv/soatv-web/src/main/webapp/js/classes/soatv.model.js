@@ -162,6 +162,7 @@ MessageTopic = function() {
 		} else {
 			// add existing instance
 			message.component.addMessage(this.messages[message.id]);
+			this.messages[message.id].body = message.body;
 			return this.messages[message.id];
 		}
 		

@@ -1,0 +1,16 @@
+<div class="message">
+	<div class="message-header" style="background-color: #9C9C9C;">
+		<span class="clickable" ng-click="onMessageClick(message.id)">Message</span>
+		<div class="message-header-color" style="background-color: {{message.color}}"></div>
+	</div>
+	<div class="message-body">
+		<strong>ID: {{message.id}}</strong><br> <b>Components</b>
+		({{message.components.length}}) : <span style="white-space: nowrap;">
+			<span ng-repeat="component in message.components track by $index">
+				<span ng-show="!$first">,&nbsp;</span> {{component.name}}
+			</span>
+		</span>
+		<hr style="margin: 5px;">
+		{{message.body}}
+	</div>
+</div>

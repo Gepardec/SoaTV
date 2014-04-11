@@ -84,6 +84,20 @@ soatvApp.controller("MainCtrl", function($scope,
 	$scope.connection.message = soatvConnection.getMessage();
 	$scope.connection.imageLink = soatvConnection.getImageLink();
 	
+	// what is showing currently
+	$scope.isShowing = "visualization";
+	
+	// what must be shown
+	$scope.changeShowing = function(desired){
+		if($scope.isShowing !== desired){
+			$scope.isShowing = desired;
+		}
+	};
+	
+	$scope.onMessageClick = function(messageId){
+		$scope.changeShowing("history");
+	};
+	
 	/*Testing mocks code start*/
 	$scope.nextAction = function() {
 		if(!mock.createdMessages){
@@ -127,7 +141,7 @@ soatvApp.controller("MainCtrl", function($scope,
 		/**
 		 * Function that processes next message in the buffer, when buffer signals
 		 */
-		soatvMessageBuffer.free = function (message){
+		var next = function (message){
 			$scope.$apply(function(){soatv.showMessagePass(
 					message.data.id,
 					message.data.node,
@@ -137,6 +151,8 @@ soatvApp.controller("MainCtrl", function($scope,
 			);
 			});
 		};
+		
+		soatvMessageBuffer.next[message.data.id] = next;
 		
 		// add new host
 		if(message.action === "RESPONSE_NEW_NODE"){
@@ -161,7 +177,8 @@ soatvApp.controller("MainCtrl", function($scope,
 		
 		// receive message
 		if(message.action === "RESPONSE_MESSAGE"){
-			soatvMessageBuffer.add(message, message.data.id);
+				soatvMessageBuffer.add(message, message.data.id);
+			
 		};
 	};
 	
@@ -194,7 +211,17 @@ soatvApp.directive('soatvTv', function(/*soatv,*/ soatvVisualization) {
 		restrict : 'A', // attribute only
 		link : function(scope, elem, attr, ctrl) {
 			elem[0].id = "soatv";
-			soatvVisualization.init(elem[0]);
+			soatvVisualization.init("tv", elem[0]);
+		}
+	};
+});
+
+soatvApp.directive('soatvHistory', function(/*soatv,*/ soatvVisualization) {
+	return {
+		restrict : 'A', // attribute only
+		link : function(scope, elem, attr, ctrl) {
+			elem[0].id = "soatvHistory";
+			soatvVisualization.init("history", elem[0]);
 		}
 	};
 });

@@ -15,6 +15,13 @@ svg {
 	margin-right: auto;
 }
 
+.bold{
+	font-weight: bolder;
+}
+.clickable:hover{
+	cursor : pointer;
+}
+
 #top-separator{
     border: 0;
     height: 2px;
@@ -47,8 +54,8 @@ svg {
 }
 
 #top img:hover{
-	-webkit-box-shadow: 0 0 20px 0 rgba(100,100,100,0.7);
-	box-shadow: 0 0 20px 0 rgba(100,100,100,0.7);
+	-webkit-box-shadow: 0px 5px 5px 0px rgba(100,100,100,0.7);
+	box-shadow: 0px 5px 5px 0px rgba(100,100,100,0.7);
 	cursor: pointer;
 }
 
@@ -110,11 +117,13 @@ svg {
 	padding : 5px;
 	font-family : 'Source Sans Pro', sans-serif;
 	font-size : 12px;
+	overflow: hidden;
 }
 
 .message-body > strong {
 	font-size: 14px;
 	font-weight: bolder;
 	color: #1058a1;
+	white-space: nowrap;
 }
 

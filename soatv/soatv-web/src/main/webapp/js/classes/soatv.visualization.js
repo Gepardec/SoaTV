@@ -413,7 +413,7 @@ VisElement.builders["message"] = {
 					delete visElement.parent.id2Child[visElement.id];
 					
 					clearInterval(interval);
-					clearInterval(destInterval);
+
 					visElement.removeVisualization();
 					visElement.parent.removeChild(visElement.id);
 					
@@ -425,59 +425,59 @@ VisElement.builders["message"] = {
 
 			};
 
-			to = VisElement._getCenter(destination.d3Container);
-			from = VisElement._getCenter(visElement.d3Container);
+			
+			var from = VisElement._getCenter(parentElement.d3Container);
 
-			// remember previous position
-			var prev = {
-				x : parseInt(visElement.d3Container.attr("cx")),
-				y : parseInt(visElement.d3Container.attr("cy"))
-			};
 
-			// remember previous destination
-			var prevDest = to;
+			
 
-			// interval to draw trace
-			var interval = setInterval(function() {
-				var curr = {
-					x : parseInt(visElement.d3Container.attr("cx")),
-					y : parseInt(visElement.d3Container.attr("cy"))
-				};
+			var interval = null;
 
-				var path = VisElement._vis._line(visElement.globals.svg, prev,
-						curr, {
-							color : visElement.color,
-							width : 1,
-							opacity : 1
+			// control whether position of the message source (original component) is stable
+			var stableInterval = setInterval(function() {
+				
+				var currPos = VisElement._getCenter(parentElement.d3Container);
+				if (VisElement._getDistance(currPos, from, true) < 5) {
+					clearInterval(stableInterval);
+					
+					// remember previous position
+					var prev = {
+						x : parseInt(visElement.d3Container.attr("cx")),
+						y : parseInt(visElement.d3Container.attr("cy"))
+					};
+					
+					// interval to draw trace
+					interval = setInterval(function() {
+						var curr = {
+							x : parseInt(visElement.d3Container.attr("cx")),
+							y : parseInt(visElement.d3Container.attr("cy"))
+						};
 
-						});
+						var path = VisElement._vis._line(visElement.globals.svg, prev,
+								curr, {
+									color : visElement.color,
+									width : 1,
+									opacity : 1
 
-				path.transition()
-				.remove(path)
-				.duration(prop.transition.traceDuration)
-				.attr("stroke-opacity", 0);
-				prev = curr;
-			}, 5);
+								});
 
-			// control whether destination has changed its position
-			var destInterval = setInterval(function() {
-				var currDest = VisElement._getCenter(destination.d3Container);
-				if (VisElement._getDistance(currDest, prevDest, true) > 20) {
-
-					visElement.d3Container
-					.transition()
-					.duration(prop.transition.duration)
-					.attr("cx", currDest.x)
-					.attr("cy", currDest.y)
+						path.transition()
+						.remove(path)
+						.duration(prop.transition.traceDuration)
+						.attr("stroke-opacity", 0);
+						prev = curr;
+					}, 5);
+					
+					to = VisElement._getCenter(destination.d3Container);
+					
+					visElement.d3Container.transition().duration(prop.transition.duration)
+					.attr("cx", to.x)
+					.attr("cy", to.y)
 					.each("end", onEnd);
 				}
-				prevDest = currDest;
-			}, 500);
+				from = currPos;
+			}, 500);	
 
-			visElement.d3Container.transition().duration(prop.transition.duration)
-			.attr("cx", to.x)
-			.attr("cy", to.y)
-			.each("end", onEnd);
 		};
 
 	}

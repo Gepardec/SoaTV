@@ -42,6 +42,7 @@ public class Agent {
 	private NotificationMessage.Component component;
 	private String messageId;
 	private String messageStatus;
+	private String messageBody;
 
 	/**
 	 * Properties to remote connection
@@ -153,6 +154,17 @@ public class Agent {
 		messageStatus = status;
 		return this;
 	}
+	
+	/**
+	 * Sets message body
+	 * 
+	 * @param status
+	 * @return current instance of Agent
+	 */
+	public Agent body(String body) {
+		messageBody = body;
+		return this;
+	}
 
 	/**
 	 * Sends prepared status message
@@ -178,6 +190,7 @@ public class Agent {
 		message.setComponent(component);
 		message.setNode(nodeName);
 		message.setStatus(messageStatus);
+		message.setBody(messageBody);
 
 		String msgString = message.toXMLString();
 		if (msgString == null) {
@@ -267,6 +280,7 @@ public class Agent {
 			connection.start();
 
 			TextMessage message = session.createTextMessage(msg);
+			System.out.println("Agent sent message: " + msg);
 			publisher.send(message);
 
 		} catch (Exception e) {

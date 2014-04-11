@@ -69,7 +69,7 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				imageConnecting : "images/ajax-loader.gif"
 			},
 			transition : {
-				duration : 2000,	// how long message flies to destination
+				duration : 1000,	// how long message flies to destination
 				subduration : 500,	// correcting fly of the message if destination has changed its position
 				traceDuration : 8000		// how long trace disappears
 			}

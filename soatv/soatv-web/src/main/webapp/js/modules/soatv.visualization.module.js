@@ -47,13 +47,20 @@ soatvVisualizationModule.factory('soatvVisualization', function(soatvVisualizati
 	 * Performs initialization of visualizer and creates instance of svg based
 	 * on DOM-Element element, that will be used for rendering.
 	 */
-	visualizer.init = function(element) {
-		
-		visualizer.container = new VisElement("svg", "svg").create({
-			containerId : element.id,
-			properties : prop,
-			globals : {}
-		});
+	visualizer.init = function(id, element) {
+		if(visualizer[id] == null)
+		visualizer[id] = 
+		{
+				container : new VisElement("svg", "svg"+id).create({
+					containerId : element.id,
+					properties : prop,
+					globals : {}
+				})
+		};
+	};
+	
+	visualizer.get = function(id){
+		return visualizer[id];
 	};
 	
 	return visualizer;

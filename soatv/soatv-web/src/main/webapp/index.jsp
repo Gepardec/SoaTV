@@ -10,6 +10,7 @@
 <link rel="stylesheet" type="text/css" href="css/soatv.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
+<script src='js/lib/jquery.js'></script>
 <script src='js/lib/angular.js'></script>
 <script src='js/lib/d3js.js'></script>
 <script src='js/lib/ws.js'></script>
@@ -42,40 +43,27 @@
 				<div class="col-md-8">
 					<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3 class="panel-title">Visualization</h3>
+							<h3 class="panel-title clickable" ng-class="{'bold' : isShowing == 'visualization'}" ng-click="changeShowing('visualization')">Visualization</h3>
 						</div>
 						<div class="panel-body">
-							<p class="tv" soatv-tv></p>
+							<p class="tv" soatv-tv ng-show="isShowing == 'visualization'"></p>
+							<p class="tv" soatv-history ng-show="isShowing == 'history'"></p>
 						</div>
 					</div>
 				</div>
 				<div class="col-md-4">
 					<div class="panel panel-default">
 						<div class="panel-heading">
-							<h3 class="panel-title">History</h3>
+							<h3 class="panel-title clickable" ng-class="{'bold' : isShowing == 'history'}" ng-click="changeShowing('history')">History</h3>
 						</div>
 						<div class="panel-body row" id="messages">
 							<div class="col-md-6" ng-repeat="message in topic">
-								<div class="message">
-									<div class = "message-header" style="background-color:#9C9C9C;">
-										Message
-										<div class = "message-header-color" style="background-color: {{message.color}}"></div>
-									</div>
-									<div class = "message-body">
-										<strong>ID: {{message.id}}</strong><br>
-										Sender : Sender<br>
-										Receiver : receiver
-										<hr style = "margin : 5px;">
-										BODY
-									</div>
-								</div>
+								<ng-include src="'templates/messagebox.html'"></ng-include>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-
 
 			<button ng-click="nextNode()">next node</button>
 			<button ng-click="nextAction()">next action</button>
