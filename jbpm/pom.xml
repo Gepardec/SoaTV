@@ -7,7 +7,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>request-for-leave</module>
-		<module>request-for-leave-test</module>
+		<!--module>request-for-leave-test</module-->
 	</modules>
 
 	<dependencies>
