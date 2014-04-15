@@ -1,55 +1,46 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <groupId>com.objectbay</groupId>
-  <artifactId>SetupSoaTv</artifactId>
-  <version>1.0</version>
+	<modelVersion>4.0.0</modelVersion>
 
-  <repositories>
-    <repository>      
-      <id>org.jboss</id>
-      <name>JBoss Nexus</name>
-      <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-      <layout>default</layout>
-    </repository>
-  </repositories>
-<build>
-<plugins>
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-dependency-plugin</artifactId>
-    <version>2.3</version>
-	<executions>
-      <execution>
-        <phase>package</phase>
-        <goals>
-          <goal>copy</goal>
-        </goals>
-        <configuration>
-          <artifactItems>
-            <artifactItem>
-              <groupId>org.kie</groupId>
-              <artifactId>kie-wb-distribution-wars</artifactId>
-              <version>6.0.0.Final</version>
-	      <classifier>eap-6_1</classifier>
-              <type>war</type>	              
-            </artifactItem>
-	    <artifactItem>
-		<groupId>com.h2database</groupId>
-		<artifactId>h2</artifactId>
-		<version>1.3.168</version>
-		<type>jar</type>
-		<destFileName>h2.jar</destFileName>
-	    </artifactItem>            
-          </artifactItems>
-          <outputDirectory>./deployments/</outputDirectory>
-        </configuration>
-      </execution>
-    </executions>	
-</plugin>
-</plugins>
-</build>
+	<groupId>com.objectbay</groupId>
+	<artifactId>SetupSoaTv</artifactId>
+	<version>1.0</version>
+
+	<repositories>
+		<repository>
+			<id>org.jboss</id>
+			<name>JBoss Nexus</name>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+			<layout>default</layout>
+		</repository>
+	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.kie</groupId>
+									<artifactId>kie-wb-distribution-wars</artifactId>
+									<version>6.0.0.Final</version>
+									<classifier>eap-6_1</classifier>
+									<type>war</type>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>./deployments/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.objectbay</groupId>
 		<artifactId>jbpm</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 	<artifactId>request-for-leave</artifactId>
 	<name>request-for-leave</name>

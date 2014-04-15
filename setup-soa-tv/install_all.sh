@@ -19,45 +19,34 @@ echo $INSTANZ
 
 GIT="git"
 MAVEN="mvn"
-TERMINAL="gnome-terminal"
 
 hash $GIT 2>/dev/null || { echo >&2 "I require $GIT but it's not installed.  Aborting."; exit 1; }
 hash $MAVEN 2>/dev/null || { echo >&2 "I require $MAVEN but it's not installed.  Aborting."; exit 1; }
-hash $TERMINAL 2>/dev/null || { echo >&2 "I require $TERMINAL but it's not installed.  Aborting."; exit 1; }
-
 
 #erstellen verzeichnisse.
-mkdir "db"
-mkdir "deployments"
-mkdir "git"
-mkdir "repositories"
-mkdir "repositories/kie"
-mkdir "workspace"
+mkdir "jbpm_install"
+mkdir "jbpm_install/git"
+mkdir "jbpm_install/repositories"
+mkdir "jbpm_install/repositories/kie"
 
 #download JBSS
 $GIT clone https://github.com/objectbay/JBSS.git
 JBSS=`pwd`/JBSS/bin/
 
-#download Projects
-$GIT clone https://github.com/objectbay/SoaTV.git
-
 #download kie workbench
-#download h2
 $MAVEN package
-mv ./deployments/h2.jar ./db/
 
 #setup jbss
 $JBSS/setup.sh -i $INSTANZ -z $1
 
 #editierten .jbpmrc
-echo "JBOSS_OPTS=\"-Dorg.kie.demo=false -Dorg.kie.example=false -Dorg.uberfire.nio.git.dir=`pwd`/git -Dorg.guvnor.m2repo.dir=`pwd`/repositories/kie\"" >> ~/.$INSTANZ"rc"
+echo "JBOSS_OPTS=\"-Dorg.kie.demo=false -Dorg.kie.example=false -Dorg.uberfire.nio.git.dir=`pwd`/jbpm_install/git -Dorg.guvnor.m2repo.dir=`pwd`/jbpm_install/repositories/kie\"" >> ~/.$INSTANZ"rc"
 
-#start h2
-$TERMINAL -e "java -jar db/h2.jar -tcp"
+$MAVEN -f ../jbpm/pom.xml -Dkie-repository=./jbpm_install/repositories/kie -DskipTests deploy
+$MAVEN -f ../soatv/pom.xml -Dkie-repository=./jbpm_install/repositories/kie -DskipTests deploy
 
 #configure jboss
 ~/bin/$INSTANZ configure configs/
-
 
 
 
