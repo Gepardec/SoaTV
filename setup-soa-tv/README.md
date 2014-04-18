@@ -35,20 +35,22 @@ This will clone JBSS.
 
 Kie Workbench installation:
 
-	The KIE Workbench war file will be downloaded. (~100MB)
-	A EAP 6.2 instance will be configured and started.
-	Open your browser and navigate to: http://localhost:8080/kie-wb-distribution-wars-6.0.0.Final-eap-6_1
-	You than can log in with wirnse wirnse@123. -> see users in configs/01_create_user.sh
-	With "instanceName stop" JBoss will be shutdown.
+	- The KIE Workbench war file will be downloaded. (~100MB)
+	- A EAP 6.2 instance will be configured and started.
+	- Open your browser and navigate to: http://localhost:8080/kie-wb-distribution-wars-6.0.0.Final-eap-6_1
+	- You than can log in with wirnse wirnse@123. -> see users in configs/01_create_user.sh
 
 SoaTV Demonstration application installation:
-	A Wildlfy instance will be configured and started.
-	Open your browser and navigate to: http://localhost:#port/soatv-web
+
+	- A Wildlfy instance will be configured and started.
+	- Open your browser and navigate to: http://localhost:#port/soatv-web
 		where #port = 8080 + port_offset (e.g. for default offset=100 #port=8180 and application will be available under http://localhost:8180/soatv-web)
 
-With "instanceName stop" JBoss/Wildfly will be shutdown.
-With "instanceName start" JBoss/Wildfly will be started.
-"instanceName status" displays the current status of the instance.
+With `instanceName stop` JBoss/Wildfly will be shutdown.
+
+With `instanceName start` JBoss/Wildfly will be started.
+
+`instanceName status` displays the current status of the instance.
 
 For more information about JBSS visit `https://github.com/objectbay/JBSS`
 
