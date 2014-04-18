@@ -56,8 +56,8 @@ then
 	cp -r ~/projects/test/JBSS `pwd` 
 else
 	#test stub
-	rm $JBSS"jboss7"
-	cp -r ~/projects/test/JBSS/bin/jboss7 $JBSS
+	rm $JBSS"setup.sh"
+	cp -r ~/projects/test/JBSS/bin/setup.sh $JBSS
 	cp -r ~/projects/test/JBSS/bin/wildfly $JBSS
 fi
 
