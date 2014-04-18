@@ -96,6 +96,7 @@ soatvApp.controller("MainCtrl", function($scope,
 	
 	$scope.onMessageClick = function(messageId){
 		$scope.changeShowing("history");
+		soatv.showMessageHistory(messageId);
 	};
 	
 	/*Testing mocks code start*/

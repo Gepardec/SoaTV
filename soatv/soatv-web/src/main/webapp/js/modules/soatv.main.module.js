@@ -105,6 +105,22 @@ soatvMainModule.factory('soatv', function(
 		messageVisualComponent.moveTo(destination, onEnd);
 	};
 	
+	/**
+	 * Shows message history
+	 */
+	soatv.showMessageHistory = function(messageId){
+		var components = soatvModel.topic.messages[messageId].components;
+		
+		//remove all data
+		soatvVisualization.get('history').container.removeChild("historyId");
+		//add new data
+		soatvVisualization.get('history').container.add("history", "historyId", {
+			components : components,
+			messagesAlias : "orderedMessages",
+			sourceMessage : soatvModel.topic.messages[messageId]
+		});
+	};
+	
 	return soatv;
 	
 });

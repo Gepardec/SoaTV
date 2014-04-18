@@ -10,12 +10,15 @@
 <link rel="stylesheet" type="text/css" href="css/soatv.css">
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 
-<script src='js/lib/jquery.js'></script>
+<!-- <script src='js/lib/jquery.js'></script> -->
 <script src='js/lib/angular.js'></script>
+<!-- <script src='js/lib/bootstrap.min.js'></script> -->
 <script src='js/lib/d3js.js'></script>
+<!-- <script src='js/lib/d3tooltip.js'></script> -->
 <script src='js/lib/ws.js'></script>
 
 <script src='js/classes/soatv.model.js'></script>
+<script src='js/classes/soatv.visualization.builders.js'></script>
 <script src='js/classes/soatv.visualization.js'></script>
 
 <script src='js/modules/soatv.model.module.js'></script>

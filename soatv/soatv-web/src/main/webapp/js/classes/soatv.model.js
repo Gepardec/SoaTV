@@ -118,8 +118,10 @@ Component = function() {
 	 * @returns
 	 */
 	Component.prototype.addMessage = function(message) {
-		this.orderedMessages.push(message);
-		this.messages[message.id] = this.orderedMessages.length - 1;
+
+			this.orderedMessages.push(message);
+			this.messages[message.id] = this.orderedMessages.length - 1;
+
 		message.components.push(this);
 		
 		var indexOfReceiver = message.components.length - 1;

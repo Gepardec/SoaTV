@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ x$1 = x ]; then
-	echo "Usage: $0 path/to/jboss-zip [instance name]"
+	echo "Usage: $0 path/to/jboss-zip [instance name] [installation dir]"
 	exit 1;	
 fi
 
@@ -11,6 +11,13 @@ if [ x$2 = x ]; then
 
 else
 	INSTANZ=$2
+fi
+
+if [ x$3 = x ]; then
+	HOME_DIR="~/soatv"
+
+else
+	HOME_DIR=$3
 fi
 
 echo $INSTANZ
@@ -37,7 +44,7 @@ JBSS=`pwd`/JBSS/bin/
 $MAVEN package
 
 #setup jbss
-$JBSS/setup.sh -i $INSTANZ -z $1
+$JBSS/setup.sh -i $INSTANZ -z $1 -j $HOME_DIR/$INSTANZ
 
 #editierten .jbpmrc
 echo "JBOSS_OPTS=\"-Dorg.kie.demo=false -Dorg.kie.example=false -Dorg.uberfire.nio.git.dir=`pwd`/jbpm_install/git -Dorg.guvnor.m2repo.dir=`pwd`/jbpm_install/repositories/kie\"" >> ~/.$INSTANZ"rc"
@@ -46,7 +53,7 @@ $MAVEN -f ../jbpm/pom.xml -Dkie-repository=./jbpm_install/repositories/kie -Dski
 $MAVEN -f ../soatv/pom.xml -Dkie-repository=./jbpm_install/repositories/kie -DskipTests deploy
 
 #configure jboss
-~/bin/$INSTANZ configure configs/
+~/bin/$INSTANZ configure configs/jbpm
 
 
 

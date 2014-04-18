@@ -4,17 +4,29 @@
 /**
  * Angular module serving as package for properties
  */
+
 var soatvPropertiesModule = angular.module('soatvPropertiesModule', []);
-
-
-
-
 
 /**
  * Factory creates singles instance of properties for visualization (css views of elements) that can be injected in other modules
  */
 soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
-	var pref = {
+	var pref = {		
+			// returns the value of property or evaluates expression in ${}
+			// any string property
+			// any string property
+			eval : function (property){
+				var regex = /^\$\{(.*)\}$/g;
+                var result = regex.exec(property);
+				if(result != null){
+					var body = result[1];	//take body of the expression
+					body = "return " + injectValue(body,"\\$", "pref.");
+					var f = new Function("pref", body);
+					return f(this);
+				} else {
+					return property;
+				}
+			},
 			svg : {
 				width : 1000,
 				height : 800,
@@ -61,6 +73,30 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				borderWidth : 3,
 				paddingColor: "white",
 				paddingWidth : 2
+			},
+			
+			breadcrumb : {
+				width : 100,
+				height : 30,
+				margin : 3,
+				points : [
+				          {x: 0, y: 0},
+				          {x: "${$breadcrumb.width}", y: 0},
+				          {x: "${$breadcrumb.width + 10}", y: "${$breadcrumb.height / 2}"},
+				          {x: "${$breadcrumb.width}", y: "${$breadcrumb.height}"},
+				          {x: 0, y: "${$breadcrumb.height}"},
+				          {x: 10, y: "${$breadcrumb.height / 2}"}],
+				text : {x : 20, y : "${$breadcrumb.height / 2}"},
+				textStyle : "fill: white; stroke: none;  font-size: 12px; font-family:'Monda';",
+				style : "fill : #9c9c9c; stroke : none;",
+				
+				vlineFillStyle : "fill:#CCCCCC;stroke:none;",	// vertical line
+				message : {width : 14, height : 14, margin : 40, strokeWidth : 2, swidth : 20, sheight : 20}
+			},
+			
+			history : {
+				start : {x : 50, y : 50},
+				pathWidth : 5
 			},
 			
 			connection : {

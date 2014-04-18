@@ -5,14 +5,14 @@ function copyProps(from, to) {
 }
 
 /**
- * Replaces in string all occurances of variable by the given value. Variable in string must start with $
- * E.g. valueInjector("Hello, $text!", "text", "world") will return the string "Hello, world!"
+ * Replaces in string all occurances of variable by the given value
+ * E.g. valueInjector("Hello, text!", "text", "world") will return the string "Hello, world!"
  * @param string
  * @param variable
  * @param value
  */
 function injectValue(string, variable, value){
-	return string.replace(new RegExp("\\$("+variable+")", "g"), value);
+	return string.replace(new RegExp("("+variable+")", "g"), value);
 }
 /**
  * =======================================================================
