@@ -229,7 +229,7 @@ if [ "$APPLICATION" == "$CON_JBPM" ]
 then
 	checkJBPM
 	echo "[INFO] Start start jbpm for zip $JBPM_JBOSS_ZIP and instance $JBPM_INSTANCE"
-	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE
+	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE $HOME_DIR
 fi
 
 if [ "$APPLICATION" == "$CON_SOATV" ]
@@ -237,7 +237,7 @@ then
 	checkSOATV
 	echo "[INFO] Script: ./install.sh --application=$CON_SOATV --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
 	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET
+	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR
 fi
 
 if [ "$APPLICATION" == "$CON_FULL" ]
@@ -245,9 +245,9 @@ then
 	checkJBPM	
 	checkSOATV
 	echo "[INFO] Start jbpm for zip $JBPM_JBOSS_ZIP and instance $JBPM_INSTANCE"
-	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE
+	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE $HOME_DIR
 	echo "[INFO] Script: ./install.sh --application=$CON_JBPM --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
 	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET
+	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR
 fi
 
