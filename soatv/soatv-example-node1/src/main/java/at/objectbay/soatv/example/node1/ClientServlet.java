@@ -169,7 +169,7 @@ public class ClientServlet extends HttpServlet {
 			.cf("/jms/RemoteConnectionFactory")
 			.topic("/jms/topic/soatvTopic");*/
 			
-			for(int i = 0; i < 10; i++){
+			for(int i = 0; i < 3; i++){
 			
 			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
 

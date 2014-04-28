@@ -91,7 +91,15 @@ soatvPropertiesModule.factory('soatvVisualizationProperties', function() {
 				style : "fill : #9c9c9c; stroke : none;",
 				
 				vlineFillStyle : "fill:#CCCCCC;stroke:none;",	// vertical line
-				message : {width : 14, height : 14, margin : 40, strokeWidth : 2, swidth : 20, sheight : 20}
+				message : {
+					width : 14,
+					height : 14,
+					margin : 40,
+					strokeWidth : 2,
+					swidth : 20,
+					sheight : 20,
+					textStyle : "fill: black; stroke: none;  font-size: 10px; font-family:'Monda';"
+				}
 			},
 			
 			history : {

@@ -364,6 +364,15 @@ visBuilders["history"] = {
 		var pathPoints = [];
 		
 		argsObject.components.forEach(function(component){
+			
+			// extend each component with temp information about messages in path
+			// if component has more than one occurance of the same message
+			// we have to know which of them to includ ein the path on the current step
+			if(component.messagesInPath == null){
+				component.messagesInPath = {};
+			}
+			
+			
 			var x = start.x + i * (width + margin);
 			visElement.add(
 					"breadcrumb",
@@ -374,10 +383,16 @@ visBuilders["history"] = {
 						text : component.id,
 						messages : component[argsObject.messagesAlias],
 						sourceMessageId : argsObject.sourceMessage.id,
+						messagesInPath : component.messagesInPath,
 						pathPoints : pathPoints
 					}
 			);
 			i++;
+		});
+		
+		//clear temp information
+		argsObject.components.forEach(function(component){
+			delete component.messagesInPath;
 		});
 		
 		//visualize message pass path
@@ -415,8 +430,9 @@ visBuilders["breadcrumb"] = {
 		
 		/**
 		 * Expected argsObject with the following structure:
-		 * {x : startx, y : starty, text: text, messages[messages], pathPoints : [points], sourceMessageId :}
+		 * {x : startx, y : starty, text: text, messages[messages], messagesInPath : {}, pathPoints : [points], sourceMessageId :}
 		 * message {id : , color : }
+		 * messagesInPath : numbers of messages in current component that are already in path
 		 * points : points of the line for the visualization of message pass path
 		 * sourceMessageId : id of the message for which the current visualizaton is being built
 		 * @param visElement
@@ -448,8 +464,8 @@ visBuilders["breadcrumb"] = {
 			.append("title").text(text);
 			
 			// adjust text length
-			if(text.length > 10){
-				text = text.substring(0, 6) + "...";
+			if(text.length > 20){
+				text = text.substring(0, 12) + "...";
 			}
 			
 			var textElement = svg.append("text")
@@ -467,6 +483,7 @@ visBuilders["breadcrumb"] = {
 			
 			var messages = argsObject.messages;
 			var i = 0;
+			var addedToPath = false;	// if component already added to the visualization of the message path
 			
 			messages.forEach(function(message){
 				
@@ -474,24 +491,37 @@ visBuilders["breadcrumb"] = {
 				var mheight = prop.breadcrumb.message.height;
 				
 				// check whether current message is the visualized message
-				if(message.id === sourceMessageId){ //then add the message center to the path
+				if(message.id === sourceMessageId && !addedToPath){ //then make the message rect bigger
 					mwidth = prop.breadcrumb.message.swidth;
 					mheight = prop.breadcrumb.message.sheight;
 				}
 				
+				var currx = start.x + prop.breadcrumb.width / 2 - mwidth / 2;
+				var curry = start.y + prop.breadcrumb.height + (i+1)*prop.breadcrumb.message.margin + i * prop.breadcrumb.message.height;
 				
 				var msg = svg.insertz("rect", 2)
-				.attr("x", start.x + prop.breadcrumb.width / 2 - mwidth / 2)
-				.attr("y", start.y + prop.breadcrumb.height + (i+1)*prop.breadcrumb.message.margin + i * prop.breadcrumb.message.height)
+				.attr("x", currx)
+				.attr("y", curry)
 				.attr("width", mwidth)
 				.attr("height", mheight)
 				.attr("style", "fill:" + message.color + ";stroke-width : "+ prop.breadcrumb.message.strokeWidth +"; stroke: " + prop.svg.backgroundColor + ";");
 				
+				var msgId = svg.insertz("text", 3)
+				.attr("x", currx)
+				.attr("y", curry - 2)
+				.attr("style", prop.breadcrumb.message.textStyle)
+				.text(message.id);
+				
 				visElement.visualComponents.push(msg);
+				visElement.visualComponents.push(msgId);
 				
 				// check whether current message is the visualized message
-				if(message.id === sourceMessageId){ //then add the message center to the path
-					argsObject.pathPoints.push(VisElement._getCenter(msg));
+				if(message.id === sourceMessageId && !addedToPath){ //then add the message center to the path
+					if(argsObject.messagesInPath[i] == null){
+						argsObject.pathPoints.push(VisElement._getCenter(msg));
+						argsObject.messagesInPath[i] = true;
+						addedToPath = true;
+					}
 				}
 				
 				i++;
