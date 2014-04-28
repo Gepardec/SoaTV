@@ -8,9 +8,11 @@
 VisElement = function(type, id) {
 	this.type = type;
 	this.id = id;
-	this.d3Container; // d3js element
-	this.id2Child = {}; // maps id of child to child index
-	this.children = []; // children instances of VisElement
+	this.d3Container; 			// d3js element
+	this.d3Draggable = null;	// d3js element that can be dragged. Drag of this visual component
+								// must drag the whole element
+	this.id2Child = {}; 		// maps id of child to child index
+	this.children = []; 		// children instances of VisElement
 	this.parent = null;
 	this.visualComponents = []; // visual components that are not logical
 	// children but part of compound element (e.g.
@@ -160,6 +162,17 @@ VisElement = function(type, id) {
 			this.id2Child[this.children[int].id] = int;
 		}
 	};
+	
+	/**
+	 * Makes visual element draggable
+	 */
+	VisElement.prototype.makeDraggable = function(){
+		if(this.d3Draggable != null){
+			this.d3Draggable.node(0).draggable = this;
+			this.d3Draggable.call(VisElement._vis._drag);
+		}
+		return this;
+	};
 };
 
 VisElement.builders = visBuilders; // list of builders
@@ -186,6 +199,14 @@ VisElement._shift = function(elem, shiftX, shiftY) {
 		var newX = parseInt(elem.attr("cx")) + shiftX;
 		var newY = parseInt(elem.attr("cy")) + shiftY;
 		elem.attr("cx", newX).attr("cy", newY);
+	} else if (elem.attr("points") != null){
+		if(elem.translate == null){
+			elem.translate = {x : shiftX, y : shiftY};
+		} else {
+			elem.translate.x += shiftX;
+			elem.translate.y += shiftY;
+		}
+		elem.attr("transform", "translate("+elem.translate.x+", "+elem.translate.y+")");
 	} else { // line
 		var newX1 = parseInt(elem.attr("x1")) + shiftX;
 		var newY1 = parseInt(elem.attr("y1")) + shiftY;
@@ -218,6 +239,19 @@ VisElement._getCenter = function(elem) {
 			y : parseInt(elem.attr("cy"))
 		};
 	}
+};
+
+/**
+ * Moves the given element to the given point
+ * @param elem
+ * @param x
+ * @param y
+ */
+VisElement._moveTo = function(elem, x, y){
+	var center = VisElement._getCenter(elem);
+	var shiftX = x - center.x;
+	var shiftY = y - center.y;
+	VisElement._shift(elem, shiftX, shiftY);
 };
 
 /**
@@ -278,3 +312,21 @@ VisElement._vis._line = function(svg, p1, p2, params) {
 	return path;
 
 };
+
+/**
+ * Support of drag behaviour in d3js
+ */
+VisElement._vis._dragmove = function() {
+	//VisElement._shift(d3.select(this), d3.event.dx, d3.event.dy);
+	this.draggable.shiftTo(d3.event.dx, d3.event.dy);
+	//console.log("event.x = "+ d3.event.x + ", event.y = " + d3.event.y);
+	/*d3.select(this)
+	      .attr("cx", d.x = Math.max(radius, Math.min(width - radius, d3.event.x)))
+	      .attr("cy", d.y = Math.max(radius, Math.min(height - radius, d3.event.y)));
+	}*/
+};
+
+VisElement._vis._drag = d3.behavior
+.drag()
+//.origin(function(d) { return d; })
+.on("drag", VisElement._vis._dragmove);

@@ -25,7 +25,11 @@ soatvMainModule.factory('soatv', function(
 			node.id = nodeId;
 			node.name = nodeName;
 			soatvModel.addNode(node);
-			soatvVisualization.get('tv').container.add("node", nodeId, {type:"jboss", header : nodeName});
+			soatvVisualization.get('tv').container
+			.add("node", nodeId, {type:"jboss", header : nodeName})
+			.find(nodeId)
+			.makeDraggable();
+			;
 		}
 	};
 	

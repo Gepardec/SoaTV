@@ -7,14 +7,17 @@ visBuilders = {};
  */
 visBuilders["svg"] = {
 	build : function(visElement, argsObject) {
-		visElement.d3Container = d3.select("#" + argsObject.containerId)
+		var svg = d3.select("#" + argsObject.containerId)
 				.append("svg")
 				.attr("width", "100%")
 				.attr("height", argsObject.properties.svg.height)
 				.attr("id", visElement.id);
 		
+		visElement.d3Container = svg;
+		visElement.d3Draggable = visElement.d3Container;
+		
 		// create elements for support z-index
-		for(var i = 0; i < 10; i++){
+		for(var i = -1; i < 10; i++){
 			visElement.d3Container.append("g")
 			.attr("id","zindex"+i);
 		}
@@ -54,8 +57,8 @@ visBuilders["svg"] = {
 								return md + 100;
 							}
 						}).size(
-						[ argsObject.properties.svg.width,
-								argsObject.properties.svg.height ]);
+						[ argsObject.properties.svg.width - argsObject.properties.node.width,
+								argsObject.properties.svg.height - argsObject.properties.node.height ]);
 
 		force.on("tick", function() {
 			visElement.children.forEach(function(child) {
@@ -122,6 +125,7 @@ visBuilders["node"] = {
 		.attr("width", prop.node.width - 2 * padding)
 		.attr("height", prop.node.topHeight)
 		.attr("style", "fill:url(#" + nodeType + "Gradient);" + ";stroke: none;");
+		visElement.d3Draggable = stripeRect;
 
 		var img = svg.append("image")
 		.attr("x", x + padding + 5)
@@ -356,6 +360,14 @@ visBuilders["history"] = {
 		
 		visElement.d3Container = svg.append("g").attr("id", visElement.id);
 		
+		// simple hach to support normal mouse scrolling is to add a big rectangle to a group
+		svg.insertz("rect",-1)
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 5000)
+		.attr("height", 2000)
+		.attr("style", "fill:"+prop.svg.backgroundColor+"; stroke:none");
+		
 		var width = prop.breadcrumb.width;
 		var margin = prop.breadcrumb.margin;
 		var i = 0;
@@ -367,7 +379,7 @@ visBuilders["history"] = {
 			
 			// extend each component with temp information about messages in path
 			// if component has more than one occurance of the same message
-			// we have to know which of them to includ ein the path on the current step
+			// we have to know which of them to include in the path on the current step
 			if(component.messagesInPath == null){
 				component.messagesInPath = {};
 			}
@@ -460,8 +472,8 @@ visBuilders["breadcrumb"] = {
 			
 			visElement.d3Container = svg.append("polygon")
 			.attr("points", points)
-			.attr("style", prop.breadcrumb.style)
-			.append("title").text(text);
+			.attr("style", prop.breadcrumb.style);
+			visElement.d3Container.append("title").text(text);
 			
 			// adjust text length
 			if(text.length > 20){
@@ -491,7 +503,7 @@ visBuilders["breadcrumb"] = {
 				var mheight = prop.breadcrumb.message.height;
 				
 				// check whether current message is the visualized message
-				if(message.id === sourceMessageId && !addedToPath){ //then make the message rect bigger
+				if(message.id === sourceMessageId && !addedToPath && argsObject.messagesInPath[i] == null){ //then make the message rect bigger
 					mwidth = prop.breadcrumb.message.swidth;
 					mheight = prop.breadcrumb.message.sheight;
 				}

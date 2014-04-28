@@ -223,6 +223,7 @@ soatvApp.directive('soatvHistory', function(/*soatv,*/ soatvVisualization) {
 		link : function(scope, elem, attr, ctrl) {
 			elem[0].id = "soatvHistory";
 			soatvVisualization.init("history", elem[0]);
+			soatvVisualization.get("history").container.makeDraggable();
 		}
 	};
 });
