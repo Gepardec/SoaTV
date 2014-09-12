@@ -51,18 +51,11 @@ fi
 JBSS=`pwd`/JBSS/bin/
 if [ ! -e $JBSS"setup.sh" ]
 then
-	#$GIT clone https://github.com/objectbay/JBSS.git
-	# test stub
-	cp -r ~/projects/test/JBSS `pwd` 
-else
-	#test stub
-	rm $JBSS"setup.sh"
-	cp -r ~/projects/test/JBSS/bin/setup.sh $JBSS
-	cp -r ~/projects/test/JBSS/bin/wildfly $JBSS
+	$GIT clone https://github.com/objectbay/JBSS.git
 fi
 
 #setup jbss
-$JBSS/setup.sh -i $INSTANZ -z $1 -o $OFFSET -j $HOME_DIR/$INSTANZ -v 8
+$JBSS/setup.sh -i $INSTANZ -z $1 -o $OFFSET -j $HOME_DIR/$INSTANZ 
 
 #build and deploy artifacts
 #
