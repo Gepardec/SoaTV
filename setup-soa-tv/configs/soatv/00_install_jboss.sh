@@ -28,4 +28,3 @@ TmpInstall=${JBOSS_HOME}_Tmp$$
 unzip -d $TmpInstall $JBossPackage
 mv $TmpInstall/* $JBOSS_HOME
 rm -r $TmpInstall
-

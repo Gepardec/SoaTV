@@ -32,8 +32,12 @@ function printHelp {
 	+-------------------------------+--------------------------------------------+
 	| common parameters             |                                            |
 	|                               |    --home-dir                              |
+	|                               | default home value used : ~/soat           |
 	|                               |                                            |
-	|                               | default home value used : ~/soatv          |
+	|                               |    --jboss-7                               |
+	|                               | explicitly use configuration for jboss 7   |
+	|                               |                                            |
+	|                               |                                            |
 	|                               |                                            |
 	|                               |                                            |
 	+-------------------------------+--------------------------------------------+
@@ -105,6 +109,7 @@ DEF_JBPM_INSTANCE=jbpm6
 DEF_SOATV_INSTANCE=soatv
 DEF_SOATV_PORT_OFFSET=100
 DEF_HOME_DIR=~/soatv
+DEF_FORCE_JBOSS_MAJOR_CODE=8
 
 #initial values
 APPLICATION=$DEF_APPLICATION
@@ -114,6 +119,7 @@ JBPM_INSTANCE=$DEF_JBPM_INSTANCE
 SOATV_WILDFLY_ZIP=
 SOATV_INSTANCE=$DEF_SOATV_INSTANCE
 SOATV_PORT_OFFSET=$DEF_SOATV_PORT_OFFSET
+FORCE_JBOSS_MAJOR_CODE=$DEF_FORCE_JBOSS_MAJOR_CODE
 
 # dialog mode
 function startDialog {
@@ -166,7 +172,8 @@ function startDialog {
 	then
 		nonEmptyPrompt "Enter path to the Wildfly zip archive for the SOATV" "SOATV_WILDFLY_ZIP"
 		defaultValuePrompt "Enter name of wildfly instance for SOATV ($DEF_SOATV_INSTANCE is default)?" "$DEF_SOATV_INSTANCE" "SOATV_INSTANCE"
-		defaultValuePrompt "Enter value of wildfly instance port offset ($DEF_SOATV_PORT_OFFSET is default)?" "$DEF_SOATV_PORT_OFFSET" "SOATV_PORT_OFFSET"		
+		defaultValuePrompt "Enter value of wildfly instance port offset ($DEF_SOATV_PORT_OFFSET is default)?" "$DEF_SOATV_PORT_OFFSET" "SOATV_PORT_OFFSET"
+		defaultValuePrompt "Enter major jboss code /7 for EAP 6.x; 8 for Wildfly/ ($DEF_FORCE_JBOSS_MAJOR_CODE is default)?" "$DEF_FORCE_JBOSS_MAJOR_CODE" "FORCE_JBOSS_MAJOR_CODE"		
 	fi
 }
 
@@ -213,6 +220,10 @@ while test $# -gt 0; do
                         export SOATV_PORT_OFFSET=`echo $1 | sed -e 's/^[^=]*=//g'`
                         shift
                         ;;
+              	--jboss-7*)
+                        export FORCE_JBOSS_MAJOR_CODE=7
+                        shift
+                        ;;
                 *)
 		        printHelp
 			;;
@@ -236,8 +247,8 @@ if [ "$APPLICATION" == "$CON_SOATV" ]
 then
 	checkSOATV
 	echo "[INFO] Script: ./install.sh --application=$CON_SOATV --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
-	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR
+	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
+	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
 fi
 
 if [ "$APPLICATION" == "$CON_FULL" ]
@@ -247,7 +258,7 @@ then
 	echo "[INFO] Start jbpm for zip $JBPM_JBOSS_ZIP and instance $JBPM_INSTANCE"
 	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE $HOME_DIR
 	echo "[INFO] Script: ./install.sh --application=$CON_JBPM --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
-	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR
+	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
+	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
 fi
 

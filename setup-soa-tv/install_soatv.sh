@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ x$1 = x ]; then
-	echo "Usage: $0 path/to/wildfly-zip [instance name] [port offset] [installation dir]"
+	echo "Usage: $0 path/to/wildfly-zip [instance name] [port offset] [installation dir] [jboss version]"
 	exit 1;	
 fi
 
@@ -25,6 +25,11 @@ if [ x$4 = x ]; then
 
 else
 	HOME_DIR=$4
+fi
+
+if [ ! x$5 = x ]; then
+	export FORCE_JBOSS_MAJOR_CODE=$5
+	echo "Use JBOSS Version $FORCE_JBOSS_MAJOR_CODE"
 fi
 
 echo $INSTANZ
