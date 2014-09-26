@@ -101,7 +101,8 @@ public class ClientServlet extends HttpServlet {
 			
 			agent
 			// setup JNDI lookup
-			.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
+			//.property(Context.PROVIDER_URL, "http-remoting://127.0.0.1:8080")
+			.property(Context.PROVIDER_URL, "remote://localhost:4547")
 			.property(Context.SECURITY_PRINCIPAL, "user")
 			.property(Context.SECURITY_CREDENTIALS, "user@123")
 			// setup topic access
