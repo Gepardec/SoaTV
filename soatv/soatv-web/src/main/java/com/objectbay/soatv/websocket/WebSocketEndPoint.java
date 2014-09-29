@@ -15,13 +15,14 @@ import org.slf4j.LoggerFactory;
 
 import com.objectbay.soatv.core.SoaTV;
 import com.objectbay.soatv.websocket.messaging.Messaging.MessageSender;
-import com.objectbay.soatv.websocket.messaging.DefaultWebSocketMessenger;
 import com.objectbay.soatv.websocket.messaging.MessagingContext;
 
 @ServerEndpoint("/soatv")
 public class WebSocketEndPoint {
 	
 	private static Logger log = LoggerFactory.getLogger(WebSocketEndPoint.class);
+	
+	private static String PING_MESSAGE = "ping";
 	
 	@Inject
 	private SoaTV soaTV;
@@ -33,7 +34,9 @@ public class WebSocketEndPoint {
 	
     @OnMessage
     public void onMessage(String message, Session session) {
-        messagingContext.getMessenger().onMessage(message);
+    	if(!PING_MESSAGE.equals(message)){
+    		messagingContext.getMessenger().onMessage(message);
+    	}
     }
     
     @OnOpen

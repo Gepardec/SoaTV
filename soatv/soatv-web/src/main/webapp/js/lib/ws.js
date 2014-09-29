@@ -61,6 +61,8 @@ var webSocket = {
 		if (webSocket.sync === true) {
 			webSocket.buffer = [];
 		}
+		
+		webSocket.ws.ping = setInterval(function(){webSocket.send("ping");}, 10000);
 	},
 
 	/**
@@ -96,6 +98,7 @@ var webSocket = {
 	},
 	
 	onclose : function(msg) {
+		clearInterval(webSocket.ws.ping);
 		webSocket.ws = null;
 		webSocket.opened = false;
 		webSocket.listeners.forEach(function(listener) {
