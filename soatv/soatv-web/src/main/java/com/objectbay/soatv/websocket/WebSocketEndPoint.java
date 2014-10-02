@@ -41,18 +41,27 @@ public class WebSocketEndPoint {
     
     @OnOpen
     public void onOpen(final Session session) {
-    	MessageSender messageSender = new MessageSender(){
+    	MessageSender messageSender = createMessageSender(session);
+		configureMessagingContext(session, messageSender);
+		log.debug("Web socket opened. Session maxIdleTime  is {}", session.getMaxIdleTimeout());
+    }
+
+	private void configureMessagingContext(final Session session, MessageSender messageSender) {
+		soaTV.getMessagingContexts().add(messagingContext);
+		messagingContext.setSession(session);
+		messagingContext.getMessenger().setMessageSender(messageSender);
+		messagingContext.getMonitor().addListener(messagingContext);
+	}
+
+	private MessageSender createMessageSender(final Session session) {
+		MessageSender messageSender = new MessageSender(){
 			
     		public synchronized void sendMessage(String msg) throws IOException {
 				session.getBasicRemote().sendText(msg);
 			}
 		};
-		soaTV.getMessagingContexts().add(messagingContext);
-		messagingContext.setSession(session);
-		messagingContext.getMessenger().setMessageSender(messageSender);
-		messagingContext.getMonitor().addListener(messagingContext);
-		log.debug("Web socket opened. Session maxIdleTime  is {}", session.getMaxIdleTimeout());
-    }
+		return messageSender;
+	}
     
     @OnClose
     public void onClose(CloseReason reason) {

@@ -25,26 +25,6 @@ public class SoaTV {
 		messagingContexts = new HashSet<MessagingContext>();
 	}
 	
-	/*public static SoaTV getInstance(){
-		if(instance == null){
-			instance = new SoaTV();
-		}
-		
-		return instance;
-	}*/
-	
-	/**
-	 * Creates new messaging context for the given web-socket session
-	 * @param session
-	 * @return
-	 */
-	/*public MessagingContext createMessagingContext(Session session){
-		MessagingContext context = new MessagingContext(new DefaultProcessingMessenger());
-		context.setSession(session);
-		messagingContexts.add(context);
-		return context;
-	}*/
-	
 	/**
 	 * Destroys given messaging context
 	 * @param context
@@ -63,9 +43,9 @@ public class SoaTV {
 	
 	public void onTopicMessage(@Observes TopicListenerOnMessageEvent event){
 		for(MessagingContext messagingContext : messagingContexts){
-			TopicMonitor m = messagingContext.getMonitor();
-			if(m != null){
-				m.onMessage(event.getMessage());
+			TopicMonitor topicMonitor = messagingContext.getMonitor();
+			if(topicMonitor != null){
+				topicMonitor.onMessage(event.getMessage());
 			}
 		}
 	}

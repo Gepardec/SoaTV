@@ -127,14 +127,19 @@ public abstract class TopicMonitor {
 		if(!componentExists(nodeName, component.getValue())){
 			getNodeComponents(nodeName).add(component);
 			
-			Properties props = new Properties();
-			props.put("node", nodeName);
-			props.put("component", component.getValue());
-			props.put("type", component.getType());
+			Properties componentProperties = createComponentProperties(nodeName, component);
 			
-			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, props));
+			notifyObservers(new TopicMonitorEvent(TopicMonitorEventType.NEW_COMPONENT, componentProperties));
 			components.put(nodeName + component.getValue(), new ArrayList<ComponentMessage>());
 		}
+	}
+
+	private Properties createComponentProperties(String nodeName, Component component) {
+		Properties props = new Properties();
+		props.put("node", nodeName);
+		props.put("component", component.getValue());
+		props.put("type", component.getType());
+		return props;
 	}
 	
 	void notifyObservers(TopicMonitorEvent event){

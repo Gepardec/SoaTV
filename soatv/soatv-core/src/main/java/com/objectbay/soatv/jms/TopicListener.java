@@ -34,7 +34,6 @@ public class TopicListener implements MessageListener{
 	
 	public void onMessage(Message arg0) {		
 		try {
-			//System.out.println("MDB Instance: " + this);
 			System.out.println("SOATV received a message: " + ((TextMessage)arg0).getText());
 		} catch (JMSException e) {
 			// TODO Auto-generated catch block
