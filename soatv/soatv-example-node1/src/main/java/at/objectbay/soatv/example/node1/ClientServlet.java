@@ -110,12 +110,12 @@ public class ClientServlet extends HttpServlet {
 			.property(Agent.REMOTE_TOPIC_USER_NAME, "user")
 			.property(Agent.REMOTE_TOPIC_PASSWORD, "user@123")
 			//setup addresses
-			.cf("/jms/RemoteConnectionFactory")
+			.connectionFactory("/jms/RemoteConnectionFactory")
 			.topic("/jms/topic/soatvTopic")
 			
 			.node("My JBoss")				// name of the node (e.g. jboss instance) that sends a message
 			.component("Client Servlet"+id)	// name of the component (e.g. ws, servlet) that sends a message
-			.id("msg"+id)	// unique id of message
+			.messageId("msg"+id)	// unique id of message
 			.status("sent").send();			// status ("sent"||"received" : component has sent || received some business message
 			
 		} catch (Exception exc) {
@@ -172,11 +172,11 @@ public class ClientServlet extends HttpServlet {
 			
 			for(int i = 0; i < 3; i++){
 			
-			agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+			agent.connectionFactory("/ConnectionFactory").topic("topic/soatvTopic")
 
 			.node("My JBoss 3")
 			.component("Client Servlet", "servlet")
-			.id("m" + (i))
+			.messageId("m" + (i))
 			.send();
 				
 			//Thread.sleep(100);
@@ -185,7 +185,7 @@ public class ClientServlet extends HttpServlet {
 				agent
 			.node("My JBoss 4")
 			.component("JBN " + i, "bean")
-			.id("m" + (i))
+			.messageId("m" + (i))
 			.send();
 				
 			//Thread.sleep(100);
@@ -202,19 +202,19 @@ public class ClientServlet extends HttpServlet {
 			
 			//send reporting message
 		
-		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+		agent.connectionFactory("/ConnectionFactory").topic("topic/soatvTopic")
 		.node("My JBoss")
 		.component("Client Servlet", "servlet")
-		.id("msawegwgaw443345agaergey4y43y43y")
+		.messageId("msawegwgaw443345agaergey4y43y43y")
 		.body("boddy"+i)
 		.send();
 			
 		Thread.sleep(100);
 		
-		agent.cf("/ConnectionFactory").topic("topic/soatvTopic")
+		agent.connectionFactory("/ConnectionFactory").topic("topic/soatvTopic")
 		.node("My JBoss2")
 		.component("JBN " + i, "bean")
-		.id("msawegwgaw443345agaergey4y43y43y")
+		.messageId("msawegwgaw443345agaergey4y43y43y")
 		.body("boddy"+i)
 		.send();
 			

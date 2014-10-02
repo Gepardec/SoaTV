@@ -36,7 +36,7 @@ public class Agent {
 	public final static String REMOTE_TOPIC_USER_NAME = "remote_topic_user_name";
 	public final static String REMOTE_TOPIC_PASSWORD = "remote_topic_password";
 
-	private static final String DEFAULT_COMPONENT_TYPE = "java";
+	private static final String COMPONENT_TYPE_JAVA = "java";
 
 	private String nodeName;
 	private NotificationMessage.Component component;
@@ -51,9 +51,13 @@ public class Agent {
 
 	private String jndiTopic;
 	private String jndiQueue;
-	private String jndiCF;
+	private String jndiConnectionFactory;
 
 	public Agent() {
+		initAgent();
+	}
+
+	private void initAgent() {
 		properties = new Hashtable<String, String>();
 		properties.put(Context.INITIAL_CONTEXT_FACTORY, JNDI_FACTORY);
 	}
@@ -94,8 +98,8 @@ public class Agent {
 	 * @param jndiCFName
 	 * @return current instance of Agent
 	 */
-	public Agent cf(String jndiCFName) {
-		jndiCF = jndiCFName;
+	public Agent connectionFactory(String jndiCFName) {
+		jndiConnectionFactory = jndiCFName;
 		return this;
 	}
 
@@ -124,13 +128,13 @@ public class Agent {
 	}
 	
 	/**
-	 * Sets component name to be sent with the message with default type
+	 * Sets component name to be sent with the message with default type "java"
 	 * 
 	 * @param component
 	 * @return current instance of Agent
 	 */
 	public Agent component(String componentName) {
-		return this.component(componentName, Agent.DEFAULT_COMPONENT_TYPE);
+		return this.component(componentName, Agent.COMPONENT_TYPE_JAVA);
 	}
 
 	/**
@@ -139,7 +143,7 @@ public class Agent {
 	 * @param id
 	 * @return current instance of Agent
 	 */
-	public Agent id(String id) {
+	public Agent messageId(String id) {
 		messageId = id;
 		return this;
 	}
@@ -182,10 +186,21 @@ public class Agent {
 		}
 
 		if (messageId == null) {
-			log.warn("Message id is not set, use id() for this. Message sending skipped");
+			log.warn("Message id is not set, use messageId() for this. Message sending skipped");
 			return;
 		}
 
+		String messageString = createNewMessage();
+		if (messageString == null) {
+			log.warn("Error occured while creating message XML. Sending skipped");
+			return;
+		}
+
+		sendMessage(messageString);
+
+	}
+
+	private String createNewMessage() {
 		NotificationMessage message = new NotificationMessage(messageId);
 		message.setComponent(component);
 		message.setNode(nodeName);
@@ -193,13 +208,7 @@ public class Agent {
 		message.setBody(messageBody);
 
 		String msgString = message.toXMLString();
-		if (msgString == null) {
-			log.warn("Error occured while creating message XML. Sending skipped");
-			return;
-		}
-
-		sendMessage(msgString);
-
+		return msgString;
 	}
 
 	/**
@@ -230,7 +239,7 @@ public class Agent {
 				return new InitialContext(env);
 			}
 		} catch (NamingException e) {
-			log.warn("{}", e);
+			log.error("{}", e);
 			return null;
 		}
 	}
@@ -244,44 +253,22 @@ public class Agent {
 			return;
 		}
 
-		if (jndiCF == null) {
+		if (jndiConnectionFactory == null) {
 			log.warn("JNDI Connection Factory name is not set, use cf() for this.");
 			return;
 		}
 
-		Context ic;
-		ConnectionFactory cf;
 		Connection connection = null;
 
 		try {
 			// connect to remote or local topic
-			ic = getInitialContext(properties.get(REMOTE_JMS) != null);
-			cf = (ConnectionFactory) ic.lookup(jndiCF);
-			Destination destination = null;
-			if(jndiTopic != null){
-				destination = (Topic) ic.lookup(jndiTopic);
-			} else {
-				destination = (Queue) ic.lookup(jndiQueue);
-			}
-			
+			Context ic = getInitialContext(properties.get(REMOTE_JMS) != null);
+			ConnectionFactory cf = (ConnectionFactory) ic.lookup(jndiConnectionFactory);
+			Destination destination = connectToDestination(ic, cf);
 			
 			//give credentials for remote connection
-			if(properties.get(REMOTE_JMS) != null && !properties.get(REMOTE_JMS).equals("false")){
-				connection = cf.createConnection(
-						properties.get(REMOTE_TOPIC_USER_NAME),
-						properties.get(REMOTE_TOPIC_PASSWORD)
-				);
-			} else {
-				connection = cf.createConnection();
-			}
-			Session session = connection.createSession(false,
-					Session.AUTO_ACKNOWLEDGE);
-			MessageProducer publisher = session.createProducer(destination);
-			connection.start();
-
-			TextMessage message = session.createTextMessage(msg);
-			System.out.println("Agent sent message: " + msg);
-			publisher.send(message);
+			connection = createConnection(cf);
+			sendMessageToDestination(msg, connection, destination);
 
 		} catch (Exception e) {
 			log.warn("Exception occured {}", e);
@@ -294,6 +281,37 @@ public class Agent {
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+
+	private void sendMessageToDestination(String msg, Connection connection,
+			Destination destination) throws JMSException {
+		Session session = connection.createSession(false,
+				Session.AUTO_ACKNOWLEDGE);
+		MessageProducer publisher = session.createProducer(destination);
+		connection.start();
+
+		TextMessage message = session.createTextMessage(msg);
+		System.out.println("Agent sent message: " + msg);
+		publisher.send(message);
+	}
+
+	private Connection createConnection(ConnectionFactory cf) throws JMSException {
+		if(properties.get(REMOTE_JMS) != null && !properties.get(REMOTE_JMS).equals("false")){
+			return cf.createConnection(
+					properties.get(REMOTE_TOPIC_USER_NAME),
+					properties.get(REMOTE_TOPIC_PASSWORD)
+			);
+		} else {
+			return cf.createConnection();
+		}
+	}
+
+	private Destination connectToDestination(Context ic, ConnectionFactory cf) throws NamingException {
+		if(jndiTopic != null){
+			return (Topic) ic.lookup(jndiTopic);
+		} else {
+			return (Queue) ic.lookup(jndiQueue);
 		}
 	}
 }
