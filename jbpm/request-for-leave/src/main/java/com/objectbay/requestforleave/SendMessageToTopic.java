@@ -16,11 +16,11 @@ public class SendMessageToTopic {
 		log.info("SendMessageToTopic-"+id+": "+node);		
 		Agent agent = new Agent();
 		agent	
-		.cf("/ConnectionFactory")
+		.connectionFactory("/ConnectionFactory")
 		.topic("topic/soatvTopic")		
 		.node(node)				
 		.component(node)	
-		.id(id.toString())	
+		.messageId(id.toString())	
 		.send();			
 	}
 }
