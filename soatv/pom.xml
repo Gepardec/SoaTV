@@ -58,6 +58,11 @@
 			<name>Kie Repository</name>
 			<url>file:${kie-repository}</url>
 		</repository>
+		<snapshotRepository>
+			<id>internal</id>
+			<name>Temporary Staging Repository</name>
+			<url>file://${project.build.directory}/mvn-repo</url>
+		</snapshotRepository>
 	</distributionManagement>
 <build>
 	<extensions>
