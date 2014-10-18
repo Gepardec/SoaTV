@@ -1,36 +1,15 @@
 #!/bin/bash
 
 if [ x$1 = x ]; then
-	echo "Usage: $0 path/to/wildfly-zip [instance name] [port offset] [installation dir] [jboss version]"
+	echo "Usage: $0 wildfly-release downloads_dir [instance name] [port offset] [installation dir] [jboss version]"
 	exit 1;	
 fi
 
-
-if [ x$2 = x ]; then
-	INSTANZ="soatv"
-
-else
-	INSTANZ=$2
-fi
-
-if [ x$3 = x ]; then
-	OFFSET=100
-
-else
-	OFFSET=$3
-fi
-
-if [ x$4 = x ]; then
-	HOME_DIR="~/soatv"
-
-else
-	HOME_DIR=$4
-fi
-
-if [ ! x$5 = x ]; then
-	export FORCE_JBOSS_MAJOR_CODE=$5
-	echo "Use JBOSS Version $FORCE_JBOSS_MAJOR_CODE"
-fi
+WILDFLY_RELEASE=${1}
+DOWNLOADS_DIR=${2-"$HOME/Downloads"}
+INSTANZ=${3-soatv}
+OFFSET=${4-100}
+HOME_DIR=${5-"~/soatv"}
 
 echo $INSTANZ
 
@@ -60,7 +39,7 @@ then
 fi
 
 #setup jbss
-$JBSS/setup.sh -i $INSTANZ -z $1 -o $OFFSET -j $HOME_DIR/$INSTANZ 
+$JBSS/setup.sh -i $INSTANZ -r $WILDFLY_RELEASE -d $DOWNLOADS_DIR -o $OFFSET -j $HOME_DIR/$INSTANZ 
 
 #build and deploy artifacts
 #

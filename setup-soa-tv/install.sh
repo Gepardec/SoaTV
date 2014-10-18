@@ -16,7 +16,8 @@ function printHelp {
 	|                               | default instance name used : jbpm6         |
 	+-------------------------------+--------------------------------------------+
 	| install SOATV-WEB application | ./install.sh --application=soatv           |
-	|                               |    --soatv-wildfly-zip=path/to/wildfly-zip |
+	|                               |    --soatv-wildfly-release=wildfly-name    |
+	|                               |    --downloads-dir=path/to/wildfly-dir     |
 	|                               |    [--soatv-instance=name]                 |
 	|                               |    [--soatv-port-offset=offset]            |
 	|                               |                                            |
@@ -25,7 +26,8 @@ function printHelp {
 	+-------------------------------+--------------------------------------------+
 	| install both applications     | ./install.sh --application=full            |
 	|                               |    --jbpm-jboss-zip=path/to/jboss-zip      |
-	|                               |    --soatv-wildfly-zip=path/to/wildfly-zip |
+	|                               |    --soatv-wildfly-release=wildfly-name    |
+	|                               |    --downloads-dir=path/to/wildfly-dir     |
 	|                               |    [--jbpm-instance=name]                  |
 	|                               |    [--soatv-instance=name]                 |
 	|                               |    [--soatv-port-offset=offset]            |
@@ -54,7 +56,7 @@ function checkJBPM {
 }
 
 function checkSOATV {
-	if [ "$SOATV_WILDFLY_ZIP" == "" ]
+	if [ "$SOATV_WILDFLY_RELEASE" == "" ]
 	then
 		echo "[ERROR] SOATV Wildfly zip archive is not defined. Type $0 --help to see usage instructions"
 		exit 0
@@ -110,13 +112,15 @@ DEF_SOATV_INSTANCE=soatv
 DEF_SOATV_PORT_OFFSET=100
 DEF_HOME_DIR=~/soatv
 DEF_FORCE_JBOSS_MAJOR_CODE=8
+DEF_DOWNLOADS_DIR=$HOME/Downloads
 
 #initial values
 APPLICATION=$DEF_APPLICATION
 HOME_DIR=$DEF_HOME_DIR
 JBPM_JBOSS_ZIP=
 JBPM_INSTANCE=$DEF_JBPM_INSTANCE
-SOATV_WILDFLY_ZIP=
+SOATV_WILDFLY_RELEASE=
+DOWNLOADS_DIR=$DEF_DOWNLOADS_DIR
 SOATV_INSTANCE=$DEF_SOATV_INSTANCE
 SOATV_PORT_OFFSET=$DEF_SOATV_PORT_OFFSET
 FORCE_JBOSS_MAJOR_CODE=$DEF_FORCE_JBOSS_MAJOR_CODE
@@ -170,7 +174,7 @@ function startDialog {
 
 	if [ "$APPLICATION" != "$CON_JBPM" ]
 	then
-		nonEmptyPrompt "Enter path to the Wildfly zip archive for the SOATV" "SOATV_WILDFLY_ZIP"
+		nonEmptyPrompt "Enter path to the Wildfly zip archive for the SOATV" "SOATV_WILDFLY_RELEASE"
 		defaultValuePrompt "Enter name of wildfly instance for SOATV ($DEF_SOATV_INSTANCE is default)?" "$DEF_SOATV_INSTANCE" "SOATV_INSTANCE"
 		defaultValuePrompt "Enter value of wildfly instance port offset ($DEF_SOATV_PORT_OFFSET is default)?" "$DEF_SOATV_PORT_OFFSET" "SOATV_PORT_OFFSET"
 		defaultValuePrompt "Enter major jboss code /7 for EAP 6.x; 8 for Wildfly/ ($DEF_FORCE_JBOSS_MAJOR_CODE is default)?" "$DEF_FORCE_JBOSS_MAJOR_CODE" "FORCE_JBOSS_MAJOR_CODE"		
@@ -208,8 +212,12 @@ while test $# -gt 0; do
                         export JBPM_INSTANCE=`echo $1 | sed -e 's/^[^=]*=//g'`
                         shift
                         ;;
-              	--soatv-wildfly-zip*)
-                        export SOATV_WILDFLY_ZIP=`echo $1 | sed -e 's/^[^=]*=//g'`
+              	--soatv-wildfly-release*)
+                        export SOATV_WILDFLY_RELEASE=`echo $1 | sed -e 's/^[^=]*=//g'`
+                        shift
+                        ;;
+              	--downloads-dir*)
+                        export DOWNLOADS_DIR=`echo $1 | sed -e 's/^[^=]*=//g'`
                         shift
                         ;;
               	--soatv-instance*)
@@ -246,9 +254,9 @@ fi
 if [ "$APPLICATION" == "$CON_SOATV" ]
 then
 	checkSOATV
-	echo "[INFO] Script: ./install.sh --application=$CON_SOATV --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
-	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
+	echo "[INFO] Script: ./install.sh --application=$CON_SOATV --soatv-wildfly-release=$SOATV_WILDFLY_RELEASE --downloads-dir=$DOWNLOADS_DIR --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
+	echo "[INFO] Start installation for zip $SOATV_WILDFLY_RELEASE, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
+	./install_soatv.sh $SOATV_WILDFLY_RELEASE $DOWNLOADS_DIR $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
 fi
 
 if [ "$APPLICATION" == "$CON_FULL" ]
@@ -257,8 +265,8 @@ then
 	checkSOATV
 	echo "[INFO] Start jbpm for zip $JBPM_JBOSS_ZIP and instance $JBPM_INSTANCE"
 	./install_jbpm.sh $JBPM_JBOSS_ZIP $JBPM_INSTANCE $HOME_DIR
-	echo "[INFO] Script: ./install.sh --application=$CON_JBPM --soatv-wildfly-zip=$SOATV_WILDFLY_ZIP --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
-	echo "[INFO] Start installation for zip $SOATV_WILDFLY_ZIP, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
-	./install_soatv.sh $SOATV_WILDFLY_ZIP $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
+	echo "[INFO] Script: ./install.sh --application=$CON_JBPM --soatv-wildfly-release=$SOATV_WILDFLY_RELEASE --downloads-dir=$DOWNLOADS_DIR --soatv-instance=$SOATV_INSTANCE --soatv-port-offset=$SOATV_PORT_OFFSET"	
+	echo "[INFO] Start installation for zip $SOATV_WILDFLY_RELEASE, instance $SOATV_INSTANCE and port-offset $SOATV_PORT_OFFSET $FORCE_JBOSS_MAJOR_CODE"
+	./install_soatv.sh $SOATV_WILDFLY_RELEASE $DOWNLOADS_DIR $SOATV_INSTANCE $SOATV_PORT_OFFSET $HOME_DIR $FORCE_JBOSS_MAJOR_CODE
 fi
 
